@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 """ 
     Pascal VOC semantic segmentation dataset
 
