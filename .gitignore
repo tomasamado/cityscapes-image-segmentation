@@ -1,0 +1,13 @@
+# Large directories 
+models/
+datasets/
+
+# Environments
+__pycache__/
+.vscode/
+.env/
+.ipynb_checkpoints/
+
+# Other 
+gpu-pablo-connect.sh
+
