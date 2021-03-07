@@ -9,6 +9,7 @@
 
 """
 
+import os
 import collections
 import glob
 import torch
@@ -21,6 +22,7 @@ from PIL import Image
 from torch.utils import data
 from os.path import join as pjoin
 from torchvision import transforms
+from cityscapesscripts.preparation import createTrainIdLabelImgs
 from cityscapesscripts.helpers.labels import labels as cityscapes_labels
 
 
@@ -30,8 +32,8 @@ class cityscapesDataset(data.Dataset):
     def __init__(self, root, split="train", encoding="trainId", is_transform=True, 
                                             img_size=(512, 256), augmentations=None):
         
-        assert split in ["train", "val", "test"], "Invalid split `{}`".format(split)
-        assert encoding in ["id", "trainId"], "Unkown endoing `{}`".format(encoding)
+        assert split in ["train", "val", "test"], "invalid split `{}`".format(split)
+        assert encoding in ["id", "trainId"], "unkown encoding `{}`".format(encoding)
         
         self.root = root 
         self.split = split
@@ -42,12 +44,25 @@ class cityscapesDataset(data.Dataset):
         self.augmentations = augmentations
         
         # Obtain the file names
+        expected = {'train': 2975, 'val': 500, 'test': 1525}
         for split in ["train", "val", "test"]:
             path = pjoin(self.root , "leftImg8bit", split, "*", "*.png")
             file_list = glob.glob(path, recursive=True)
             file_list.sort()
-            self.files[split] = file_list 
-    
+            self.files[split] = file_list         
+            assert len(file_list) == expected[split], "unexpedted data size" 
+        
+        # Generate the trainId labels if necessary
+        if encoding == "trainId":
+            os.environ["CITYSCAPES_DATASET"] = root
+            searchFine   = os.path.join(root , "gtFine"   , "*" , "*" , "*_labelTrainIds.png")
+            filesFine = glob.glob(searchFine)
+            # Create the labels using the trainId encoding
+            if len(filesFine) != 5000:
+                createTrainIdLabelImgs.main()
+            else:
+                print("Annotations files processed")
+            
         self.tf = transforms.Compose(
             [
                 transforms.ToTensor(),
@@ -130,6 +145,7 @@ class cityscapesDataset(data.Dataset):
 
         if plot:
             plt.imshow(rgb)
+            plt.axis('off')
             plt.show()
         else:
             return rgb
