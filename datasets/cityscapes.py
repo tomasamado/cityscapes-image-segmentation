@@ -1,9 +1,14 @@
-""" 
-    Pascal VOC semantic segmentation dataset
+#!/usr/bin/python
 
-    Author: dikshant2210
+""" 
+    Cityscapes Pixel-Level Semantic Labeling dataset
+
+    Author: pabvald
+
+    Code based on the 'pascalVocDataset class' of `Dikshant Gupta <https://github.com/dikshant2210>`_.
+
 """
-# +
+
 import collections
 import glob
 import torch
@@ -17,16 +22,10 @@ from torch.utils import data
 from os.path import join as pjoin
 from torchvision import transforms
 from cityscapesscripts.helpers.labels import labels as cityscapes_labels
-# -
-
-cityscapesPath = '../Cityscapes'
 
 
 class cityscapesDataset(data.Dataset):
-    """ Data loader for the Cityscapes Pixel-Level Semantic Labeling Task 
-        
-        Code based on the 'pascalVocDataset class' of `Dikshant Gupta <https://github.com/dikshant2210>`_.
-    """
+    """ Data loader for the Cityscapes Pixel-Level Semantic Labeling Task  """
     
     def __init__(self, root, split="train", encoding="trainId", is_transform=True, 
                                             img_size=(512, 256), augmentations=None):
