@@ -66,7 +66,7 @@ class cityscapesDataset(data.Dataset):
         self.tf = transforms.Compose(
             [
                 transforms.ToTensor(),
-                # Add Normalization
+                transforms.Normalize([0.2869, 0.3251, 0.2839], [0.1743, 0.1793, 0.1761]),                
             ]
         )
         
