@@ -89,14 +89,32 @@ class cityscapesDataset(data.Dataset):
             im, lbl = self.transform(im, lbl)
         return im, lbl
     
-    def class_ids(self):
+    def label_ids(self):
         """ Return the classes' ids of the corresponding encoding """
         if self.encoding == "trainId":
             labels = [label.trainId for label in cityscapes_labels]
-        else: # self.encoding = "id"
+        else: 
             labels = [label.id for label in cityscapes_labels]
         return sorted(np.unique(labels))
     
+    def label_colours(self):
+        """ Return the classes' color of the corresponding encoding"""
+        if self.encoding == "trainId":
+            label_colours  = { label.trainId : label.color for label in cityscapes_labels}
+            label_colours[255] = (0,0,0)
+        else:
+            label_colours  = { label.id : label.color for label in cityscapes_labels}
+        return label_colours
+    
+    def label_names(self):
+        """ Return the classes' name of the corresponding encoding"""
+        if self.encoding == "trainId":
+            label_names  = { label.trainId : label.name for label in cityscapes_labels}
+            label_names[255] = 'unlabeled'
+        else:
+            label_names  = { label.id : label.name for label in cityscapes_labels}
+        return label_names
+        
     def transform(self, img, lbl):
         """ Apply the specified transformations to the image and resize both image 
             and label accordingly.
@@ -112,7 +130,6 @@ class cityscapesDataset(data.Dataset):
         lbl = lbl.resize((self.img_size[0], self.img_size[1]))
         img = self.tf(img)
         lbl = torch.from_numpy(np.array(lbl)).long()
-        #lbl[lbl == 255] = 0
         return img, lbl
         
     def decode_segmap(self, label_mask, plot=False):
@@ -127,14 +144,11 @@ class cityscapesDataset(data.Dataset):
         Returns:
             (np.ndarray, optional): the resulting decoded color image.
         """
-        if self.encoding == "trainId":
-            label_colours  = { label.trainId : label.color for label in cityscapes_labels}
-        else:
-            label_colours  = { label.id : label.color for label in cityscapes_labels}
+        label_colours = self.label_colours()
         r = label_mask.copy()
         g = label_mask.copy()
         b = label_mask.copy()
-        for ll in self.class_ids():
+        for ll in self.label_ids():
             r[label_mask == ll] = label_colours[ll][0]
             g[label_mask == ll] = label_colours[ll][1]
             b[label_mask == ll] = label_colours[ll][2]
