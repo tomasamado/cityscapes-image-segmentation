@@ -30,7 +30,7 @@ class cityscapesDataset(data.Dataset):
     """ Data loader for the Cityscapes Pixel-Level Semantic Labeling Task  """
     
     def __init__(self, root, split="train", encoding="trainId", is_transform=True, 
-                                            img_size=(512, 256), augmentations=None):
+                                            img_size=(20148, 1024), augmentations=None):
         
         assert split in ["train", "val", "test"], "invalid split `{}`".format(split)
         assert encoding in ["id", "trainId"], "unkown encoding `{}`".format(encoding)
@@ -127,7 +127,7 @@ class cityscapesDataset(data.Dataset):
             Transformed image and label mask.
         """
         img = img.resize((self.img_size[0], self.img_size[1]))  # uint8 with RGB mode
-        lbl = lbl.resize((self.img_size[0], self.img_size[1]))
+        ll = lbl.resize((self.img_size[0], self.img_size[1]))
         img = self.tf(img)
         lbl = torch.from_numpy(np.array(lbl)).long()
         return img, lbl
