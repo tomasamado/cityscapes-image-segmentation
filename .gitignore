@@ -1,0 +1,16 @@
+# Large directories 
+models/
+VOCdevkit/
+Cityscapes/
+VOCtrainval_11-May-2012.tar
+gtFine_trainvaltest.zip
+leftImg8bit_trainvaltest.zip
+
+# Environments
+__pycache__/
+.*
+# Other 
+docker.sh
+gpu-pablo-connect.sh
+credential.json
+
