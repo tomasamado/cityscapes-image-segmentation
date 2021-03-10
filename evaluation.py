@@ -16,12 +16,12 @@ class EvaluationReport:
                "dice_coeff", "jaccard_sim", "f1_score"}
     
     def __init__(self, confusion_matrix, labels, weights=None):
-        self._cm = confusion_matrix       
-        self.labels = np.array(labels)
-        self.n_classes = len(labels)
-        self.decimal_places = 4
-        self.weights = weights
-
+        self._cm = confusion_matrix    
+        self._weights = weights
+        self._decimal_places = 4    
+        self._labels = np.array(labels)
+        self._n_classes = len(labels)
+       
     
     # Factory methods     
     @classmethod
@@ -39,7 +39,7 @@ class EvaluationReport:
             Returs:
                 (EvaluationReport) - A evaluation report
         """  
-        cm = ml_conf_m(ground_truths.numpy(), predictions.numpy(), labels=labels)
+        cm = ml_conf_m(ground_truths, predictions, labels=labels)
         return cls(cm, labels, weights)
 
     @classmethod
@@ -67,14 +67,39 @@ class EvaluationReport:
                 inputs = inputs.to(device)
                 outputs = model(inputs)
                 pred_list.append(torch.argmax(outputs.detach().cpu(),dim = 1))
-                true_list.append(ground_truths)
         
         true_list = torch.flatten(torch.cat(true_list))
         pred_list = torch.flatten(torch.cat(pred_list))
     
         cm = ml_conf_m(true_list.numpy(), pred_list.numpy(), labels=labels)
         return cls(cm, labels, weights)    
+        
+    # Properties 
+    @property
+    def weights(self):
+        return self._weights
     
+    @property
+    def decimal_places(self):
+        return self._decimal_places
+    
+    @property
+    def labels(self):
+        return self._labels
+    
+    # Setters
+    @weights.setter
+    def weights(self, weights):
+        assert len(weights) == len(self._labels), "invalid number of weights"
+        self._weights = weights
+        
+    @decimal_places.setter
+    def decimal_places(self, decimal_places):
+        assert decimal_places >= 1, "the minimimum number of decimal places is 1"
+        self._decimal_places = decimal_places
+        
+    
+    # Evaluation metrics     
     def confusion_matrix(self, pos_label=1):
         """ Return the confusion matrix of a certain label.
         
@@ -84,14 +109,13 @@ class EvaluationReport:
             Returns:
                 (numpy.array) - Confusion matrix
         """
-        assert any(np.isin(self.labels, pos_label)), "unknown target class"
-        index_label = np.where(self.labels == pos_label)[0][0]  
+        assert any(np.isin(self._labels, pos_label)), "unknown target class"
+        index_label = np.where(self._labels == pos_label)[0][0]  
         return self._cm[index_label]
-        
-    # Evaluation metrics 
+    
     def get_metrics(self, metrics="all", pos_label=1, average="binary"):
         """
-            Compute all metrics.
+            Compute a set of metrics.
             
             Parameters:
                 metrics (any subset of {"all", "accuracy", "sensitivity", "specificity", 
@@ -230,24 +254,24 @@ class EvaluationReport:
                 (array-like, array-like) - Indices of the confusion matrices and weights
         """
         assert any(np.isin(EvaluationReport.averages, average)), "unkown 'average' method"
-        assert any(np.isin(self.labels, pos_label)), "unknown target class"
+        assert any(np.isin(self._labels, pos_label)), "unknown target class"
         
         indices = []
         weights = []
         if average == "binary":
-            index_label = np.where(self.labels == pos_label)[0][0]  
+            index_label = np.where(self._labels == pos_label)[0][0]  
             indices.append(index_label)
             weights.append(1)
         else:
-            for label in self.labels:
-                index_label = np.where(self.labels == label)[0][0]  
+            for label in self._labels:
+                index_label = np.where(self._labels == label)[0][0]  
                 indices.append(index_label)
             if average == "macro":
-                weights = np.ones(len(self.labels))
+                weights = np.ones(len(self._labels))
             else:
-                assert self.weights is not None, "no weights have been provided"
-                weights = self.weights
-        return indices, weights
+                assert self._weights is not None, "no weights have been provided"
+                weights = self._weights
+        return np.array(indices), np.array(weights)
     
     def _accuracy(self, indices, weights):
         """
@@ -266,7 +290,7 @@ class EvaluationReport:
             acc_i = (TP + TN) / (TP + TN + FP + FN)
             accuracies.append(acc_i)
         acc = np.average(accuracies, weights=weights)
-        return round(acc, self.decimal_places)
+        return round(acc, self._decimal_places)
     
     def _sensitivity(self, indices, weights):
         """
@@ -285,7 +309,7 @@ class EvaluationReport:
             sens_i = (TP / (TP + FN))
             sensitivities.append(sens_i)
         sen = np.average(sensitivities, weights=weights)
-        return round(sen, self.decimal_places)
+        return round(sen, self._decimal_places)
     
     
     def _specificity(self, indices, weights):
@@ -305,7 +329,7 @@ class EvaluationReport:
             spec_i = (TN / (TN+FP))
             specificities.append(spec_i)
         spec = np.average(specificities, weights=weights)
-        return round(spec, self.decimal_places)
+        return round(spec, self._decimal_places)
     
     
     def _dice_coeff(self, indices, weights):
@@ -325,7 +349,7 @@ class EvaluationReport:
             dc_i =  (2*TP / (2*TP + FP + FN))
             dice_coeffs.append(dc_i)
         dc = np.average(dice_coeffs, weights=weights)
-        return round(dc, self.decimal_places)
+        return round(dc, self._decimal_places)
     
     def _jaccard_similarity(self, indices, weights):
         """
@@ -344,7 +368,7 @@ class EvaluationReport:
             js_i = (TP / (TP + FP + FN))
             jaccard_sims.append(js_i)
         js = np.average(jaccard_sims, weights=weights)
-        return round(js, self.decimal_places)
+        return round(js, self._decimal_places)
     
     def _f1_score(self, indices, weights):
         """
@@ -363,7 +387,7 @@ class EvaluationReport:
             f1_i =  (TP / (TP + 0.5*(FP + FN)))
             f1_scores.append(f1_i)
         f1 = np.average(f1_scores, weights=weights)   
-        return round(f1, self.decimal_places) 
+        return round(f1, self._decimal_places) 
 
 
 
