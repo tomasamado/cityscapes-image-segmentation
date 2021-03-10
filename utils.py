@@ -19,7 +19,7 @@ def median_frequency_balancing(training_data, n_classes):
             n_classes (int) - Number of classes
 
         Returns: 
-            (torch.Tensor) - Weight of each class
+            (array) - Weight of each class
     """
     freqs = np.zeros(n_classes) # Frequencies of each class
     pixel_counts = np.zeros(n_classes) # Number of pixels of class c
@@ -40,7 +40,7 @@ def median_frequency_balancing(training_data, n_classes):
     median = np.median(freqs)  
     weights = median / freqs 
 
-    return torch.from_numpy(weights).float()
+    return weights
 
 def plot_seg_results(images, ground_truths, predictions):
     """ Plot a grid of several images, their ground-truth segmentations
@@ -112,6 +112,7 @@ def plot_metric(metric_history, label):
     epochs = range(len(metric_history))
     plt.plot(epochs, metric_history, 'b', label=label)
     plt.title(label + " vs. Epochs")
+    plt.xticks(np.arange(0, len(epochs), 1.0))
     plt.xlabel('Epochs')
     plt.ylabel(label)
     plt.legend()
