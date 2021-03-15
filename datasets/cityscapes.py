@@ -126,12 +126,32 @@ class cityscapesDataset(data.Dataset):
         Returns:
             Transformed image and label mask.
         """
-        img = img.resize((self.img_size[0], self.img_size[1]))  # uint8 with RGB mode
-        lbl = lbl.resize((self.img_size[0], self.img_size[1]))
+        img = img.resize((self.img_size[0], self.img_size[1]), Image.NEAREST)  # uint8 with RGB mode
+        lbl = lbl.resize((self.img_size[0], self.img_size[1]), Image.NEAREST)
         img = self.tf(img)
         lbl = torch.from_numpy(np.array(lbl)).long()
         return img, lbl
-        
+    
+    def encode_segmap(self, mask):
+        """Encode segmentation label images as cityscapes classes
+
+        Args:
+            mask (np.ndarray): raw segmentation label image of dimension
+              (M, N, 3), in which the Cityscapes classes are encoded as colours.
+
+        Returns:
+            (np.ndarray): class map with dimensions (M,N), where the value at
+            a given location is the integer denoting the class index.
+        """
+        mask = mask.astype(int)
+        label_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.int16)
+        for label in self.label_ids():
+            colour = self.label_colours()[label]
+            label_mask[np.where(np.all(mask == colour, axis=-1))[:2]] = label
+        label_mask = label_mask.astype(int)
+        # print(np.unique(label_mask))
+        return label_mask
+    
     def decode_segmap(self, label_mask, plot=False):
         """Decode segmentation class labels into a color image
 
@@ -163,4 +183,6 @@ class cityscapesDataset(data.Dataset):
             plt.show()
         else:
             return rgb
+
+
 
