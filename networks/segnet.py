@@ -41,11 +41,14 @@ class conv2DBatchNormRelu(nn.Module):
                 out_channels (int) – Number of channels produced by the convolution
                 kernel_size (int or tuple) – Size of the convolving kernel
                 stride (int or tuple, optional) – Stride of the convolution. Default: 1
-                padding (int or tuple, optional) – Zero-padding added to both sides of the input. Default: 0
-                dilation (int or tuple, optional) – Spacing between kernel elements. Default: 1
-                bias (bool, optional) – If True, adds a learnable bias to the output. Default: True
-                batchnorm (bool, optional) – If True, adds a torch.nn.BatchNorm2d(out_channels) layer to the 
-                        module. Default: True
+                padding (int or tuple, optional) – Zero-padding added to both sides of 
+                    the input. Default: 0
+                dilation (int or tuple, optional) – Spacing between kernel elements. 
+                    Default: 1
+                bias (bool, optional) – If True, adds a learnable bias to the output. 
+                    Default: True
+                batchnorm (bool, optional) – If True, adds a torch.nn.BatchNorm2d(out_channels) 
+                    layer to the module. Default: True
         """
         super(conv2DBatchNormRelu, self).__init__()
         if batchnorm:
@@ -85,8 +88,10 @@ class segnetEncoderBlock2(nn.Module):
                 out_channels (int): number of output channels.
         """
         super(segnetEncoderBlock2, self).__init__()
-        self.conv1 = conv2DBatchNormRelu(in_channels, out_channels, kernel_size=3, stride=1, padding=1)
-        self.conv2 = conv2DBatchNormRelu(out_channels, out_channels, kernel_size=3, stride=1, padding=1)
+        self.conv1 = conv2DBatchNormRelu(in_channels, out_channels, 
+                                            kernel_size=3, stride=1, padding=1)
+        self.conv2 = conv2DBatchNormRelu(out_channels, out_channels, 
+                                            kernel_size=3, stride=1, padding=1)
         self.maxpool = nn.MaxPool2d(kernel_size=2, stride=2, return_indices=True)
 
     def forward(self, inputs):
@@ -96,8 +101,8 @@ class segnetEncoderBlock2(nn.Module):
                 inputs (torch.Tensor): inputs to be encoded.
 
             Returns:
-                (torch.Tensor, torch.Tensor, int): encoded input, indices of the MaxPooling operation 
-                and output's size
+                (torch.Tensor, torch.Tensor, int): encoded input, indices of 
+                the MaxPooling operation and output's size
         """
         outputs = self.conv1(inputs)
         outputs = self.conv2(outputs)
@@ -117,9 +122,12 @@ class segnetEncoderBlock3(nn.Module):
                 out_channels (int) - Number of output channels.
         """
         super(segnetEncoderBlock3, self).__init__()
-        self.conv1 = conv2DBatchNormRelu(in_channels, out_channels, kernel_size=3, stride=1, padding=1)
-        self.conv2 = conv2DBatchNormRelu(out_channels, out_channels, kernel_size=3, stride=1, padding=1)
-        self.conv3 = conv2DBatchNormRelu(out_channels, out_channels, kernel_size=3, stride=1, padding=1)
+        self.conv1 = conv2DBatchNormRelu(in_channels, out_channels, 
+                                            kernel_size=3, stride=1, padding=1)
+        self.conv2 = conv2DBatchNormRelu(out_channels, out_channels, 
+                                            kernel_size=3, stride=1, padding=1)
+        self.conv3 = conv2DBatchNormRelu(out_channels, out_channels, 
+                                            kernel_size=3, stride=1, padding=1)
         self.maxpool = nn.MaxPool2d(kernel_size=2, stride=2, return_indices=True)
 
     def forward(self, inputs):
@@ -129,8 +137,8 @@ class segnetEncoderBlock3(nn.Module):
                 inputs (torch.Tensor) - Inputs to be encoded.
 
             Returns:
-                (torch.Tensor, torch.Tensor, int) - Encoded input, indices of the MaxPooling operation 
-                and output's size
+                (torch.Tensor, torch.Tensor, int) - Encoded input, indices of 
+                the MaxPooling operation and output's size
         """
         outputs = self.conv1(inputs)
         outputs = self.conv2(outputs)
@@ -152,8 +160,10 @@ class segnetDecoderBlock2(nn.Module):
         """
         super(segnetDecoderBlock2, self).__init__()
         self.unpool = nn.MaxUnpool2d(2,2)
-        self.conv1 = conv2DBatchNormRelu(in_channels, out_channels, kernel_size=3, stride=1, bias=False, padding=1)
-        self.conv2 = conv2DBatchNormRelu(out_channels, out_channels, kernel_size=3, stride=1,bias=False,    padding=1)
+        self.conv1 = conv2DBatchNormRelu(in_channels, out_channels, 
+                            kernel_size=3, stride=1, bias=False, padding=1)
+        self.conv2 = conv2DBatchNormRelu(out_channels, out_channels, 
+                            kernel_size=3, stride=1, bias=False, padding=1)
 
     def forward(self, inputs, indices, output_size):
         """ Decode the input. 
@@ -184,9 +194,12 @@ class segnetDecoderBlock3(nn.Module):
         """
         super(segnetDecoderBlock3, self).__init__()
         self.unpool = nn.MaxUnpool2d(2,2)
-        self.conv1 = conv2DBatchNormRelu(in_channels, out_channels, kernel_size=3, stride=1, bias=False, padding=1)
-        self.conv2 = conv2DBatchNormRelu(out_channels, out_channels, kernel_size=3, stride=1,bias=False,    padding=1)
-        self.conv3 = conv2DBatchNormRelu(out_channels, out_channels, kernel_size=3, stride=1,bias=False,    padding=1)
+        self.conv1 = conv2DBatchNormRelu(in_channels, out_channels, 
+                        kernel_size=3, stride=1, bias=False, padding=1)
+        self.conv2 = conv2DBatchNormRelu(out_channels, out_channels, 
+                        kernel_size=3, stride=1,bias=False,    padding=1)
+        self.conv3 = conv2DBatchNormRelu(out_channels, out_channels, 
+                        kernel_size=3, stride=1,bias=False,    padding=1)
 
     def forward(self, inputs, indices, output_size):
         """ Decode the input. 
@@ -223,21 +236,31 @@ class Segnet(nn.Module):
         self.debug = debug     
 
         # Encoder (VGG16 without Classifier)
-        self.enc_block00 = segnetEncoderBlock2(self.encoder_dims('block00', 'in'), self.encoder_dims('block00', 'out'))
-        self.enc_block01 = segnetEncoderBlock2(self.encoder_dims('block01', 'in'), self.encoder_dims('block01', 'out'))
-        self.enc_block02 = segnetEncoderBlock3(self.encoder_dims('block02', 'in'), self.encoder_dims('block02', 'out'))
-        self.enc_block03 = segnetEncoderBlock3(self.encoder_dims('block03', 'in'), self.encoder_dims('block03', 'out'))
-        self.enc_block04 = segnetEncoderBlock3(self.encoder_dims('block04', 'in'), self.encoder_dims('block04', 'out'))
-        
+        self.enc_block00 = segnetEncoderBlock2(self.encoder_dims('block00', 'in'), 
+                                                self.encoder_dims('block00', 'out'))
+        self.enc_block01 = segnetEncoderBlock2(self.encoder_dims('block01', 'in'), 
+                                                self.encoder_dims('block01', 'out'))
+        self.enc_block02 = segnetEncoderBlock3(self.encoder_dims('block02', 'in'), 
+                                                self.encoder_dims('block02', 'out'))
+        self.enc_block03 = segnetEncoderBlock3(self.encoder_dims('block03', 'in'), 
+                                                self.encoder_dims('block03', 'out'))
+        self.enc_block04 = segnetEncoderBlock3(self.encoder_dims('block04', 'in'), 
+                                                self.encoder_dims('block04', 'out'))
+                               
         # Initialize the encoder's weights
         self._load_encoder_weights()
 
         # Decoder 
-        self.dec_block04 = segnetDecoderBlock3(self.decoder_dims('block04','in'), self.decoder_dims('block04','out'))
-        self.dec_block03 = segnetDecoderBlock3(self.decoder_dims('block03','in'), self.decoder_dims('block03','out'))
-        self.dec_block02 = segnetDecoderBlock3(self.decoder_dims('block02','in'), self.decoder_dims('block02','out'))
-        self.dec_block01 = segnetDecoderBlock2(self.decoder_dims('block01','in'), self.decoder_dims('block01','out'))
-        self.dec_block00 = segnetDecoderBlock2(self.decoder_dims('block00','in'), self.decoder_dims('block00','out'))
+        self.dec_block04 = segnetDecoderBlock3(self.decoder_dims('block04','in'), 
+                                                self.decoder_dims('block04','out'))
+        self.dec_block03 = segnetDecoderBlock3(self.decoder_dims('block03','in'), 
+                                                self.decoder_dims('block03','out'))
+        self.dec_block02 = segnetDecoderBlock3(self.decoder_dims('block02','in'), 
+                                                self.decoder_dims('block02','out'))
+        self.dec_block01 = segnetDecoderBlock2(self.decoder_dims('block01','in'), 
+                                                self.decoder_dims('block01','out'))
+        self.dec_block00 = segnetDecoderBlock2(self.decoder_dims('block00','in'), 
+                                                self.decoder_dims('block00','out'))
 
         # Initialize the decoder's weights
         normal_init(self.dec_block04)
