@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# coding: utf-8
+
 """ 
     utils module 
 """
@@ -9,7 +12,7 @@ import matplotlib.pyplot as plt
 def normal_init(m, mean=0, std=1):
     """Initialize the weights of a module using a normal distribution 
 
-    Args:
+    Parameters:
         m (nn.Module) - Module to be initialize
         mean (number) - Mean of the normal distribution.
         std (number) - Standard deviation of the normal distribution.
