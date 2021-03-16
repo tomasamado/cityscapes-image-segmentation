@@ -7,15 +7,14 @@
 import os
 import torch.nn as nn
 import torch.nn.functional as F
-import torch   
-import rrcnblock
-import matplotlib.pyplot as plt
+import torch  
+from .rrcnblock import RRConv
 
 class Downsample(nn.Module):
     def __init__(self, in_channel, out_channel):
         super(Downsample, self).__init__()
         
-        self.rrcu = rrcnblock.RRConv(in_channel, out_channel)
+        self.rrcu = RRConv(in_channel, out_channel)
         self.maxpool = nn.MaxPool2d(2)
         
     def forward(self, x):
@@ -31,7 +30,7 @@ class Upsample(nn.Module):
         super(Upsample, self).__init__()
         
         self.convtrans1 = nn.ConvTranspose2d(in_channel, out_channel, 3, stride = 2, padding = 1, output_padding = 1)
-        self.rrcu = rrcnblock.RRConv(in_channel, out_channel)
+        self.rrcu = RRConv(in_channel, out_channel)
         
     def forward(self, x, x_crop):
         
@@ -58,7 +57,7 @@ class R2UNet(nn.Module):
         self.upsample3 = Upsample(256,128)
         self.upsample4 = Upsample(128,64)     
         
-        self.rrcu1 = rrcnblock.RRConv(512, 1024)
+        self.rrcu1 = RRConv(512, 1024)
         self.conv1 = nn.Conv2d(64, 19, 1)
 
         
