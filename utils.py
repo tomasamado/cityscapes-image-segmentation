@@ -50,15 +50,15 @@ def plot_seg_results(images, ground_truths, predictions):
         and their predicted segmentations.
       
       Args:
-        images (torch.Tensor or numpy.array) - Images
-        ground_truths (torch.Tensor or numpy.array) - Ground-truth segmentations
+        images (numpy.array) - Images
+        ground_truths (numpy.array) - Ground-truth segmentations
         predictions () - Predicted segmentations
     """
     f, axarr = plt.subplots(len(images), 3)
     f.set_size_inches(10,3*len(images))
     
     for i in range(len(images)):
-        axarr[i,0].imshow(images[i].permute(1, 2, 0))
+        axarr[i,0].imshow(images[i])
         axarr[i,1].imshow(ground_truths[i])
         axarr[i,2].imshow(predictions[i].squeeze())
     
@@ -102,7 +102,7 @@ def plot_seg_result(image, ground_truth, prediction):
     axarr[2].set_title('PREDICTION')
     
     plt.show()
-    
+
 def plot_metric(metric_history, label): 
     """ Plot a metric vs. the epochs 
       
