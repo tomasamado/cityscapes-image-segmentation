@@ -14,18 +14,18 @@ class Conv1dPosEncRelu(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=1, stride=1,
                             padding=0, bias=True, positional_encoding=True):
         super(Conv1dPosEncRelu, self).__init__()
-        self.out_channels = out_channels
-        self.pos_enc = positional_encoding
+
         self.conv = nn.Conv1d(in_channels, out_channels, kernel_size=kernel_size, 
                                         stride=stride, padding=padding, bias=bias)
+        self.pos_enc = positional_encoding
+        if positional_encoding:
+            self.encoder = pe.PositionalEncodingPermute1D(out_channels)
         self.relu = nn.ReLU()
 
     def forward(self, inputs):
         Q = self.conv(inputs)
         if self.pos_enc:
-            encoder = pe.PositionalEncodingPermute1D(self.out_channels)
-            PE = encoder(torch.zeros(Q.size()))
-            Q = Q + PE
+              Q = Q + self.encoder(Q.new(Q.size())) # Q = Q + P
         outputs = self.relu(Q)
         return outputs 
 
@@ -35,18 +35,18 @@ class Conv1dPosEncSigmoid(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=1, stride=1,
                             padding=0, bias=True, positional_encoding=True):
         super(Conv1dPosEncSigmoid, self).__init__()
-        self.out_channels = out_channels
-        self.pos_enc = positional_encoding
+        
         self.conv = nn.Conv1d(in_channels, out_channels, kernel_size=kernel_size, 
                                         stride=stride, padding=padding, bias=bias)
+        self.pos_enc = positional_encoding
+        if positional_encoding:
+            self.encoder = pe.PositionalEncodingPermute1D(out_channels)
         self.sigmoid = nn.Sigmoid()
-
+    
     def forward(self, inputs):
         Q = self.conv(inputs)
         if self.pos_enc:
-            encoder = pe.PositionalEncodingPermute1D(self.out_channels)
-            PE = encoder(torch.zeros(Q.size()))
-            Q = Q + PE
+            Q = Q + self.encoder(Q.new(Q.size())) # Q = Q + P
         outputs = self.sigmoid(Q)
         return outputs  
 
@@ -54,7 +54,7 @@ class HANet(nn.Module):
     """ Height-driven Attention Networks (HaNet) class """
 
     def __init__(self, l_dims, h_dims, ww_pool="average", attention_height=16, 
-                    reduction_ratio=32,n_convolutions=3, positional_encoding=True):
+                    reduction_ratio=32, n_convolutions=3, positional_encoding=True):
         """ Initialize an instance of HANet. 
 
             Parameters:
@@ -139,4 +139,4 @@ class HANet(nn.Module):
         A = self.up(A_hat)
         # print("A = ", A.size()[1:])
         return A
-        
+
