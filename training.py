@@ -17,6 +17,9 @@ def train_early_stopping(model, dataloaders, dataset_sizes, labels,
         
         Parameters:
             model (torch.nn.Module) - Model to be trained
+            dataloaders (array-like shape) - Dataloaders (train and val)
+            dataset_sizes (array-like shape) - Datasets' sizes (train and val)
+            labels (array-like shape) - Target labels
             model_path (string) - Path to save the best model
             criterion () - Loss function 
             optimizer () - Optimizer 
