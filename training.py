@@ -26,10 +26,12 @@ def train_early_stopping(model, dataloaders, dataset_sizes, labels,
     """
     epoch = 0
     fails = 0
-    best_model_ = {
+    best_model = {
         'epoch': 0,
+        'model_state_dict': copy.deepcopy(model.state_dict()),
+        'optimizer_state_dict': copy.deepcopy(optimizer.state_dict()),
+        'loss': 0.0,
         'val_f1': 0,
-        'model': copy.deepcopy(model.state_dict()),
     }
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -43,16 +45,16 @@ def train_early_stopping(model, dataloaders, dataset_sizes, labels,
             model.train()
             running_loss = 0.0
             
-            for inputs, labels in dataloaders['train']:
+            for inputs, ground_truths in dataloaders['train']:
                 inputs = inputs.to(device)
-                labels = labels.to(device)
+                ground_truths  = ground_truths.to(device)
                 
                 optimizer.zero_grad()
                 
                 # forward 
                 outputs = model(inputs)
                 preds = torch.argmax(outputs, 1)
-                loss = criterion(outputs, labels)
+                loss = criterion(outputs, ground_truths)
                 
                 # backward
                 loss.backward()
@@ -66,26 +68,28 @@ def train_early_stopping(model, dataloaders, dataset_sizes, labels,
         epoch += n_steps
         
         # evaluate validation error
-        eval_report = EvaluationReport.from_model(dataloaders['val'],
-                                        model, labels)
+        eval_report = evaluation.EvaluationReport.from_model(dataloaders['val'], model, labels)
         val_f1 = eval_report.f1_score(average="macro")
         
         if val_f1 > best_model['val_f1']:
             fails = 0
             best_model = {
                 'epoch': epoch-1,
-                'val_f1': val_acc,
-                'model': copy.deepcopy(model.state_dict()),
+                'model_state_dict': copy.deepcopy(model.state_dict()),
+                'optimizer_state_dict': copy.deepcopy(optimizer.state_dict()),
+                'loss': epoch_loss,
+                'val_f1': val_f1,
+                
             }
             # save best model until now
             torch.save(best_model, pjoin(model_path, 'best_model.pt'))
         else:
             fails += 1
             
-        print('Epoch: {} - [Val.] F1-score: {:.4f}, fails: '.format(
-                epoch, epoch_loss, epoch_acc, fails))
+        print('Epoch: {} - [Val.] F1-score: {:.4f}, fails: {}'.format(
+                epoch-1, val_f1, fails))
  
     # load best model weights
-    model.load_state_dict(best_model['model'])
+    model.load_state_dict(best_model['model_state_dict'])
     
     return model

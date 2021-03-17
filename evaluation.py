@@ -57,7 +57,6 @@ class EvaluationReport:
             Returs:
                 (EvaluationReport) - A evaluation report
         """
-        print("updated")
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         true_list = []
         pred_list = []
@@ -69,21 +68,13 @@ class EvaluationReport:
             for inputs, ground_truths in dataloader:
                 inputs = inputs.to(device)
                 outputs = model(inputs)
-                preds = 
-                pred_list.append(torch.argmax(outputs.detach().cpu(), dim = 1))
-                true_list.append(ground_truths.cpu())
+                preds = torch.argmax(outputs, dim = 1).detach().cpu()
+                pred_list.append(preds)
+                true_list.append(ground_truths)
+        true_list = torch.flatten(torch.cat(true_list))
+        pred_list = torch.flatten(torch.cat(pred_list))
         
-        print("pred_list[0]: type = ", type(pred_list[0], " size = ", pred_list[0].size())
-        print("true_list[0]: type = ", type(true_list[0], " size = ", true_list[0].size())
-        true_list = torch.flatten(torch.cat(true_list)).cpu()
-        pred_list = torch.flatten(torch.cat(pred_list)).cpu()
-        print("pred_list[0]: type = ", type(pred_list[0], " size = ", pred_list[0].size())
-        print("true_list[0]: type = ", type(true_list[0], " size = ", true_list[0].size())
-        
-        print(type(true_list))
-        print(type(pred_list))
-        
-        cm = ml_conf_m(true_list, pred_list, labels=labels)
+        cm = ml_conf_m(true_list.detach().cpu().numpy(), pred_list.detach().cpu().numpy(), labels=labels)
         return cls(cm, labels, weights)    
         
     # Properties 
