@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
-
-# In[379]:
+# %%
+#R2unet model with 64 channels at the first layer
 
 
 import os
@@ -40,9 +40,9 @@ class Upsample(nn.Module):
            
         return x
     
-class R2UNet(nn.Module):
+class R2UNet64(nn.Module):
     def __init__(self):
-        super(R2UNet, self).__init__()
+        super(R2UNet64, self).__init__()
         
         #Conv layer
         
@@ -50,7 +50,6 @@ class R2UNet(nn.Module):
         self.downsample2 = Downsample(64,128)
         self.downsample3 = Downsample(128,256)
         self.downsample4 = Downsample(256,512)
-        self.downsample5 = Downsample(512,1024)
         
         self.upsample1 = Upsample(1024,512)
         self.upsample2 = Upsample(512,256)
@@ -79,4 +78,45 @@ class R2UNet(nn.Module):
         x = F.relu(self.conv1(x))
         
         return x
+    
+class R2UNet16(nn.Module):
+    def __init__(self):
+        super(R2UNet16, self).__init__()
+        
+        #Conv layer
+        
+        self.downsample1 = Downsample(3,16)
+        self.downsample2 = Downsample(16, 32)
+        self.downsample3 = Downsample(32,64)
+        self.downsample4 = Downsample(64,128)
+        
+        self.upsample1 = Upsample(256,128)
+        self.upsample2 = Upsample(128,64)
+        self.upsample3 = Upsample(64,32)
+        self.upsample4 = Upsample(32,16)   
+        
+        self.rrcu1 = RRConv(128, 256)
+        self.conv1 = nn.Conv2d(16, 19, 1)
 
+        
+
+    def forward(self, x):
+
+        x, x_crop1 = self.downsample1(x) 
+        x, x_crop2 = self.downsample2(x)   
+        x, x_crop3 = self.downsample3(x)    
+        x, x_crop4 = self.downsample4(x)
+        
+        x = self.rrcu1(x)
+        
+        x = self.upsample1(x, x_crop4)
+        x = self.upsample2(x, x_crop3)
+        x = self.upsample3(x, x_crop2)
+        x = self.upsample4(x, x_crop1)
+        
+        x = F.relu(self.conv1(x))
+        
+        return x
+
+
+# %%
