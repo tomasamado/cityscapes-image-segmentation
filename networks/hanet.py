@@ -25,7 +25,7 @@ class Conv1dPosEncRelu(nn.Module):
     def forward(self, inputs):
         Q = self.conv(inputs)
         if self.pos_enc:
-              Q = Q + self.encoder(Q.new(Q.size())) # Q = Q + P
+            Q = Q + self.encoder(Q.new(Q.size())) # Q = Q + P
         outputs = self.relu(Q)
         return outputs 
 
