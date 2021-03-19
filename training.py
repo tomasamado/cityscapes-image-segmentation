@@ -11,6 +11,50 @@ from os.path import join as pjoin
 from evaluation import EvaluationReport
 
 
+# +
+def train(model, dataloaders, dataset_sizes, model_path, 
+                             criterion, optimizer, epochs):
+    
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model.train()
+    print('Training started')
+    print('-' * 10)
+    
+    for epoch in range(epochs):
+        running_corrects = 0
+        running_loss = 0.0
+        
+        for inputs, labels in dataloaders['train']:
+            # send inputs and labels to GPU
+            inputs = inputs.to(device)
+            labels = labels.to(device)
+            
+            # reset the gradient
+            optimizer.zero_grad()
+            
+            # compute loss
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            preds = torch.argmax(outputs, dim = 1)
+            loss.backward()
+            optimizer.step()
+            
+            running_loss += loss.item() * inputs.size(0)
+        
+        epoch_loss = running_loss/dataset_sizes['train']
+        print('Epoch {}/{} - train loss = {}'.format(epoch, epochs - 1, epoch_loss))
+        checkpoint = {
+            'epoch': epoch,
+            'model_state_dict': copy.deepcopy(model.state_dict()),
+            'optimizer_state_dict': copy.deepcopy(optimizer.state_dict()),
+            'loss': epoch_loss,  
+        }
+        # save best model until now
+        torch.save(checkpoint, pjoin(model_path, 'epoch-{}.pt'.format(epoch)))
+
+    return model
+
+
 def train_early_stopping(model, dataloaders, dataset_sizes, model_path, 
                              criterion, optimizer, n_steps=2, patience=2):
     """ Train a model applying early stopping 
