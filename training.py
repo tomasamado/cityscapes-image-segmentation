@@ -11,15 +11,14 @@ from os.path import join as pjoin
 from evaluation import EvaluationReport
 
 
-def train_early_stopping(model, dataloaders, dataset_sizes, labels, 
-            model_path, criterion, optimizer, n_steps=2, patience=2):
+def train_early_stopping(model, dataloaders, dataset_sizes, model_path, 
+                             criterion, optimizer, n_steps=2, patience=2):
     """ Train a model applying early stopping 
         
         Parameters:
             model (torch.nn.Module) - Model to be trained
             dataloaders (array-like shape) - Dataloaders (train and val)
             dataset_sizes (array-like shape) - Datasets' sizes (train and val)
-            labels (array-like shape) - Target labels
             model_path (string) - Path to save the best model
             criterion () - Loss function 
             optimizer () - Optimizer 
@@ -33,8 +32,8 @@ def train_early_stopping(model, dataloaders, dataset_sizes, labels,
         'epoch': 0,
         'model_state_dict': copy.deepcopy(model.state_dict()),
         'optimizer_state_dict': copy.deepcopy(optimizer.state_dict()),
-        'loss': 0.0,
-        'val_f1': 0,
+        'loss': 1e8,
+        'val_loss': 1e8,
     }
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -44,8 +43,8 @@ def train_early_stopping(model, dataloaders, dataset_sizes, labels,
     while fails < patience:
         
         # train during n epochs
+        model.train()
         for i in range(n_steps):
-            model.train()
             running_loss = 0.0
             
             for inputs, ground_truths in dataloaders['train']:
@@ -71,26 +70,36 @@ def train_early_stopping(model, dataloaders, dataset_sizes, labels,
         epoch += n_steps
         
         # evaluate validation error
-        eval_report = evaluation.EvaluationReport.from_model(dataloaders['val'], model, labels)
-        val_f1 = eval_report.f1_score(average="macro")
-        
-        if val_f1 > best_model['val_f1']:
+        model.eval()
+        running_loss = 0.0
+        for inputs, ground_truths in dataloaders['val']:
+            with torch.no_grad():
+                inputs = inputs.to(device)
+                ground_truths = ground_truths.to(device)
+
+                # forward 
+                outputs = model(inputs)
+                preds = torch.argmax(outputs, 1)
+                loss = criterion(outputs, ground_truths)
+
+                running_loss += loss.item() * inputs.size(0)
+                
+        if running_loss < best_model['val_loss']:
             fails = 0
             best_model = {
                 'epoch': epoch-1,
                 'model_state_dict': copy.deepcopy(model.state_dict()),
                 'optimizer_state_dict': copy.deepcopy(optimizer.state_dict()),
                 'loss': epoch_loss,
-                'val_f1': val_f1,
-                
+                'val_loss': running_loss,       
             }
             # save best model until now
             torch.save(best_model, pjoin(model_path, 'best_model.pt'))
         else:
             fails += 1
             
-        print('Epoch: {} - [Val.] F1-score: {:.4f}, fails: {}'.format(
-                epoch-1, val_f1, fails))
+        print('Epoch: {} - [Val] Loss: {:.4f}, fails: {}'.format(
+                epoch-1, running_loss, fails))
  
     # load best model weights
     model.load_state_dict(best_model['model_state_dict'])
