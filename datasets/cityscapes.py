@@ -18,13 +18,18 @@ import scipy.io as io
 import matplotlib.pyplot as plt
 import cityscapesscripts.helpers.csHelpers as cs
 
+# +
 from PIL import Image
 from torch.utils import data
 from os.path import join as pjoin
+
 from torchvision import transforms
+import torchvision.transforms.functional as TF
 from cityscapesscripts.preparation import createTrainIdLabelImgs
 from cityscapesscripts.helpers.labels import labels as cityscapes_labels
 
+
+# -
 
 class cityscapesDataset(data.Dataset):
     """ Data loader for the Cityscapes Pixel-Level Semantic Labeling Task  """
@@ -66,7 +71,7 @@ class cityscapesDataset(data.Dataset):
         self.tf = transforms.Compose(
             [
                 transforms.ToTensor(),
-                transforms.Normalize([0.2869, 0.3251, 0.2839], [0.1743, 0.1793, 0.1761]),                
+                transforms.Normalize([0.2869, 0.3251, 0.2839], [0.1743, 0.1793, 0.1761]),
             ]
         )
         
@@ -125,11 +130,18 @@ class cityscapesDataset(data.Dataset):
 
         Returns:
             Transformed image and label mask.
+            
         """
+        
         img = img.resize((self.img_size[0], self.img_size[1]), Image.NEAREST)  # uint8 with RGB mode
         lbl = lbl.resize((self.img_size[0], self.img_size[1]), Image.NEAREST)
+        if self.split == 'train':
+            i, j, h, w = transforms.RandomCrop.get_params(img, output_size=(256, 512))
+            img = TF.crop(img, i, j, h, w)
+            lbl = TF.crop(lbl, i, j, h, w)
         img = self.tf(img)
-        lbl = torch.from_numpy(np.array(lbl)).long()
+        lbl = torch.from_numpy(np.array(lbl)).long()   
+        
         return img, lbl
     
     def encode_segmap(self, mask):
@@ -183,6 +195,5 @@ class cityscapesDataset(data.Dataset):
             plt.show()
         else:
             return rgb
-
 
 
