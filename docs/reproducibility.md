@@ -3,10 +3,10 @@
 Include the following code before executing an experiment:
 
 ```python
- import torch
+import torch
 torch.manual_seed(0)
 
-inport random
+import random
 random.seed(0)
 
 import numpy as np
