@@ -32,8 +32,6 @@ class EvaluationReport:
                 self._weights[c] = nc
             self._weights = self._weights / total
             
-    
-    # Factory methods     
     @classmethod
     def from_predictions(cls, ground_truths, predictions, labels, weights=None):
         """ Create a MetricsReport object given the ground-truth labels and the 
@@ -85,8 +83,7 @@ class EvaluationReport:
         cm = cm_sklearn(true_list.detach(), pred_list.detach(), labels=labels)
         
         return cls(cm, labels, weights)    
-        
-    # Properties     
+          
     @property
     def weights(self):
         return self._weights
@@ -99,7 +96,6 @@ class EvaluationReport:
     def labels(self):
         return self._labels
     
-    # Setters  
     @weights.setter
     def weights(self, weights):
         assert len(weights) == len(self._labels), "invalid number of weights"
@@ -110,8 +106,101 @@ class EvaluationReport:
         assert decimal_places >= 1, "the minimimum number of decimal places is 1"
         self._decimal_places = decimal_places
         
+        
+    @staticmethod
+    def _TN(TN, FP, FN, TP):
+        return TN
     
-    # Evaluation metrics     
+    @staticmethod
+    def _FP(TN, FP, FN, TP):
+        return FP
+    
+    @staticmethod
+    def _FN(TN, FP, FN, TP):
+        return FN
+    
+    @staticmethod
+    def _TP(TN, FP, FN, TP):
+        return TP
+    
+    @staticmethod
+    def _accuracy(TN, FP, FN, TP):
+        return (TP + TN) / (TP + TN + FP + FN)
+    
+    @staticmethod
+    def _precision(TN, FP, FN, TP):
+        return (TP / (TP + FP))
+    
+    @staticmethod
+    def _recall(TN, FP, FN, TP):
+        return (TP / (TP + FN))
+
+    @staticmethod
+    def _specificity(TN, FP, FN, TP):
+        return (TN / (TN + FP))
+    
+    @staticmethod
+    def _jaccard_similarity(TN, FP, FN, TP):
+        return (TP / (TP + FP + FN))
+    
+    @staticmethod
+    def _f1_score(TN, FP, FN, TP):
+        return (2*TP / (2*TP + FP + FN))
+    
+    
+    def _weighted_sum(self, values, weights, normalize=False):
+        """ Compute a weighted sum """
+        value = np.average(values, weights=weights)
+        return round(value, self._decimal_places)
+    
+    def _confusion_matrix(self, c):
+        """ Obtain the confusion matrix for class c """
+        TP = self._cm[c, c]
+        FN = sum(self._cm[c,:]) - self._cm[c,c]
+        FP = sum(self._cm[:,c]) - self._cm[c,c]
+        TN = sum(sum(self._cm)) - TP - FN - FP
+        return np.array([[TN, FP], [FN, TP]])
+    
+    def _general_metric(self, metric, pos_label=1, average="binary"):
+        """
+            Obtain the necessary confusion matrix and weights to compute any metric.
+            
+            Parameters:
+                pos_label (str or int, default=1) - The class to report if average='binary' 
+                and the data is binary.
+                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
+                
+            Returns:
+                (array-like, array-like) - Indices of the confusion matrices and weights
+        """
+        assert any(np.isin(EvaluationReport.averages, average)), "unknown 'average' method"
+        assert any(np.isin(self._labels, pos_label)), "unknown target class '{}'".format(pos_label)
+        
+        indices = []
+        weights = []
+        scores = []
+        
+        if average == "binary":
+            index_label = np.where(self._labels == pos_label)[0][0]  
+            indices.append(index_label)
+            weights.append(1)
+        else:
+            for label in self._labels:
+                index_label = np.where(self._labels == label)[0][0]  
+                indices.append(index_label)
+            if average == "macro":
+                weights = np.ones(len(self._labels))
+            else:
+                weights = self._weights
+                
+        indices = np.array(indices)         
+        for i in indices:
+            TN, FP, FN, TP = self._confusion_matrix(i).ravel()
+            score_i =  metric(TN, FP, FN, TP) 
+            scores.append(score_i)
+        return self._weighted_sum(scores, weights)
+         
+        
     def confusion_matrix(self, pos_label=1):
         """ Return the confusion matrix of a certain label.
         
@@ -176,12 +265,7 @@ class EvaluationReport:
             Returns:
                 (float) - True Negatives
         """
-        indices, weights = self._general_metric(pos_label, average)
-        tns = []
-        for i in indices:
-            TN, FP, FN, TP = self._confusion_matrix(i).ravel()
-            tns.append(TN)
-        return self._weighted_sum(tns, weights)  
+        return self._general_metric(EvaluationReport._TN, pos_label, average)   
 
     def FP(self, pos_label=1, average="binary"):
         """ Compute the False Positives.
@@ -194,12 +278,7 @@ class EvaluationReport:
             Returns:
                 (float) - False Positives
         """
-        indices, weights = self._general_metric(pos_label, average)
-        fps = []
-        for i in indices:
-            TN, FP, FN, TP = self._confusion_matrix(i).ravel()
-            fps.append(FP)
-        return self._weighted_sum(fps, weights)  
+        return self._general_metric(EvaluationReport._FP, pos_label, average)    
 
     def FN(self, pos_label=1, average="binary"):
         """ Compute the False Negatives.
@@ -212,12 +291,7 @@ class EvaluationReport:
             Returns:
                 (float) - False Negatives
         """
-        indices, weights = self._general_metric(pos_label, average)
-        fns = []
-        for i in indices:
-            TN, FP, FN, TP = self._confusion_matrix(i).ravel()
-            fns.append(FN)
-        return self._weighted_sum(fns, weights)  
+        return self._general_metric(EvaluationReport._FN, pos_label, average)    
 
     def TP(self, pos_label=1, average="binary"):
         """ Compute the True Positives.
@@ -230,12 +304,7 @@ class EvaluationReport:
             Returns:
                 (float) - True Positives
         """
-        indices, weights = self._general_metric(pos_label, average)
-        tps = []
-        for i in indices:
-            TN, FP, FN, TP = self._confusion_matrix(i).ravel()
-            tps.append(TP)
-        return self._weighted_sum(tps, weights)  
+        return self._general_metric(EvaluationReport._TP, pos_label, average)   
 
     def accuracy(self, pos_label=1, average="binary"):
         """ Compute the accuracy in a per-class basis.
@@ -248,13 +317,7 @@ class EvaluationReport:
             Returns:
                 (float) - Accuracy
         """
-        indices, weights = self._general_metric(pos_label, average)
-        accuracies = []
-        for i in indices:
-            TN, FP, FN, TP = self._confusion_matrix(i).ravel()
-            acc_i = (TP + TN) / (TP + TN + FP + FN)
-            accuracies.append(acc_i)
-        return self._weighted_sum(accuracies, weights)
+        return self._general_metric(EvaluationReport._accuracy, pos_label, average)   
 
     def precision(self, pos_label=1, average="binary"):
         """ Compute the precision.
@@ -267,13 +330,7 @@ class EvaluationReport:
             Returns:
                 (float) - precision
         """
-        indices, weights = self._general_metric(pos_label, average)
-        precisions = []
-        for i in indices:
-            TN, FP, FN, TP = self._confusion_matrix(i).ravel()
-            prec_i = TP / (TP + FP)
-            precisions.append(prec_i)
-        return self._weighted_sum(precisions, weights)  
+        return self._general_metric(EvaluationReport._precision, pos_label, average)   
 
     def recall(self, pos_label=1, average="binary"):
         """ Compute the Recall.
@@ -286,13 +343,7 @@ class EvaluationReport:
             Returns:
                 (float) - Recall
         """
-        indices, weights = self._general_metric(pos_label, average)
-        recalls = []
-        for i in indices:
-            TN, FP, FN, TP = self._confusion_matrix(i).ravel()
-            recall_i = TP / (TP + FN)
-            recalls.append(recall_i)
-        return self._weighted_sum(recalls, weights)  
+        return self._general_metric(EvaluationReport._recall, pos_label, average)  
 
     def sensitivity(self, pos_label=1, average="binary"):
         """ Compute the sensitivity.
@@ -305,13 +356,7 @@ class EvaluationReport:
             Returns:
                 (float) - Sensitivity
         """
-        indices, weights = self._general_metric(pos_label, average)
-        sensitivities = []
-        for i in indices:
-            TN, FP, FN, TP = self._confusion_matrix(i).ravel()
-            sens_i = (TP / (TP + FN))
-            sensitivities.append(sens_i)
-        return self._weighted_sum(sensitivities, weights)    
+        return self._general_metric(EvaluationReport._recall, pos_label, average) 
     
     def specificity(self, pos_label=1, average="binary"):
         """ Compute the specifity.
@@ -324,13 +369,7 @@ class EvaluationReport:
             Returns:
                 (float) - Specitifity
         """
-        indices, weights = self._general_metric(pos_label, average)
-        specificities = []
-        for i in indices:
-            TN, FP, FN, TP = self._confusion_matrix(i).ravel()
-            spec_i = (TN / (TN + FP))
-            specificities.append(spec_i)
-        return self._weighted_sum(specificities, weights)
+        return self._general_metric(EvaluationReport._specificity, pos_label, average)
     
     
     def dice_coeff(self, pos_label=1, average="binary"):
@@ -344,13 +383,7 @@ class EvaluationReport:
             Returns:
                 (float) - Dice's coefficient
         """
-        indices, weights = self._general_metric(pos_label, average)
-        dice_coeffs = []
-        for i in indices:
-            TN, FP, FN, TP = self._confusion_matrix(i).ravel()
-            dc_i =  (2*TP / (2*TP + FP + FN))
-            dice_coeffs.append(dc_i)
-        return self._weighted_sum(dice_coeffs, weights)
+        return self._general_metric(EvaluationReport._f1_score, pos_label, average)
     
     def jaccard_similarity(self, pos_label=1, average="binary"):
         """ Compute Jaccard similarity
@@ -363,13 +396,7 @@ class EvaluationReport:
             Returns:
                 (float) - Jaccard similarity
         """
-        indices, weights = self._general_metric(pos_label, average)
-        jaccard_sims = []
-        for i in indices:
-            TN, FP, FN, TP = self._confusion_matrix(i).ravel()
-            js_i = (TP / (TP + FP + FN))
-            jaccard_sims.append(js_i)
-        return self._weighted_sum(jaccard_sims, weights)
+        return self._general_metric(EvaluationReport._jaccard_similarity, pos_label, average)
     
     def f1_score(self, pos_label=1, average="binary"):
         """ Compute Jaccard similarity
@@ -382,54 +409,7 @@ class EvaluationReport:
             Returns:
                 (float) - Jaccard similarity
         """
-        indices, weights = self._general_metric(pos_label, average)
-        f1_scores = []
-        for i in indices:
-            TN, FP, FN, TP = self._confusion_matrix(i).ravel()
-            f1_i =  (TP / (TP + 0.5*(FP + FN)))
-            f1_scores.append(f1_i)
-        return self._weighted_sum(f1_scores, weights)
-    
-    def _general_metric(self, pos_label=1, average="binary"):
-        """
-            Obtain the necessary confusion matrix and weights to compute any metric.
-            
-            Parameters:
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (array-like, array-like) - Indices of the confusion matrices and weights
-        """
-        assert any(np.isin(EvaluationReport.averages, average)), "unknown 'average' method"
-        assert any(np.isin(self._labels, pos_label)), "unknown target class '{}'".format(pos_label)
-        
-        indices = []
-        weights = []
-        if average == "binary":
-            index_label = np.where(self._labels == pos_label)[0][0]  
-            indices.append(index_label)
-            weights.append(1)
-        else:
-            for label in self._labels:
-                index_label = np.where(self._labels == label)[0][0]  
-                indices.append(index_label)
-            if average == "macro":
-                weights = np.ones(len(self._labels))
-            else:
-                weights = self._weights
-        return np.array(indices), np.array(weights)
-    
-    def _confusion_matrix(self, c):
-        TP = self._cm[c, c]
-        FN = sum(self._cm[c,:]) - self._cm[c,c]
-        FP = sum(self._cm[:,c]) - self._cm[c,c]
-        TN = sum(sum(self._cm)) - TP - FN - FP
-        return np.array([[TN, FP], [FN, TP]])
-    
-    def _weighted_sum(self, values, weights, normalize=False):
-        """ Compute a weighted sum """
-        value = np.average(values, weights=weights)
-        return round(value, self._decimal_places)
-        
+        return self._general_metric(EvaluationReport._f1_score, pos_label, average)
+
+
+
