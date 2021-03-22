@@ -103,7 +103,7 @@ def plot_seg_result(image, ground_truth, prediction):
     
     plt.show()
 
-def plot_metric(metric_history, label): 
+def plot_metric(metric_history, label, color='b'): 
     """ Plot a metric vs. the epochs 
       
       Args: 
@@ -113,7 +113,7 @@ def plot_metric(metric_history, label):
         title (string): title for the plot
     """
     epochs = range(len(metric_history))
-    plt.plot(epochs, metric_history, 'b', label=label)
+    plt.plot(epochs, metric_history, color, label=label)
     plt.title(label + " vs. Epochs")
     plt.xticks(np.arange(0, len(epochs), 1.0))
     plt.xlabel('Epochs')
@@ -174,5 +174,3 @@ class EarlyStopping:
             self.trace_func(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
         torch.save(model.state_dict(), self.path)
         self.val_loss_min = val_loss
-
-
