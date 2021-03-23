@@ -115,7 +115,7 @@ def plot_metric(metric_history, label, color='b'):
     epochs = range(len(metric_history))
     plt.plot(epochs, metric_history, color, label=label)
     plt.title(label + " vs. Epochs")
-    plt.xticks(np.arange(0, len(epochs), 1.0))
+    plt.xticks(np.arange(0, len(epochs), 2.0))
     plt.xlabel('Epochs')
     plt.ylabel(label)
     plt.legend()

@@ -98,7 +98,8 @@ class pascalVOCDataset(data.Dataset):
             im, lbl = self.augmentations(im, lbl)
         if self.is_transform:
             im, lbl = self.transform(im, lbl)
-        return im, torch.clamp(lbl, max=20)
+            lbl = torch.clamp(lbl, max=20)
+        return im, lbl
 
     def transform(self, img, lbl):
         if self.img_size == ("same", "same"):

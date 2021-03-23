@@ -410,6 +410,3 @@ class EvaluationReport:
                 (float) - Jaccard similarity
         """
         return self._general_metric(EvaluationReport._f1_score, pos_label, average)
-
-
-
