@@ -125,27 +125,27 @@ class EvaluationReport:
     
     @staticmethod
     def _accuracy(TN, FP, FN, TP):
-        return (TP + TN) / (TP + TN + FP + FN)
+        return (TP + TN) / (TP + TN + FP + FN + 1e-7)
     
     @staticmethod
     def _precision(TN, FP, FN, TP):
-        return (TP / (TP + FP))
+        return (TP / (TP + FP + 1e-7))
     
     @staticmethod
     def _recall(TN, FP, FN, TP):
-        return (TP / (TP + FN))
+        return (TP / (TP + FN + 1e-7))
 
     @staticmethod
     def _specificity(TN, FP, FN, TP):
-        return (TN / (TN + FP))
+        return (TN / (TN + FP + 1e-7))
     
     @staticmethod
     def _jaccard_similarity(TN, FP, FN, TP):
-        return (TP / (TP + FP + FN))
+        return (TP / (TP + FP + FN + 1e-7))
     
     @staticmethod
     def _f1_score(TN, FP, FN, TP):
-        return (2*TP / (2*TP + FP + FN))
+        return (2*TP / (2*TP + FP + FN + 1e-7))
     
     
     def _weighted_sum(self, values, weights, normalize=False):
