@@ -17,14 +17,14 @@ def train(model, dataloaders, dataset_sizes, model_path,
     """ Train a model for a fixed number of epochs, saving its
         weights at the end of every epoch.
         
-        Parameters:
-            model (torch.nn.Module) - Model to be trained
-            dataloaders (array-like shape) - Dataloaders (train)
-            dataset_sizes (array-like shape) - Datasets' sizes (train)
-            model_path (string) - Path to save the model after each epoch
-            criterion (torch.nn.functional) - Loss function 
-            optimizer (torch.optim) - Optimizer 
-            epochs (int) - Number of epochs to train
+    Args:
+        model (torch.nn.Module) - Model to be trained
+        dataloaders (array-like shape) - Dataloaders (train)
+        dataset_sizes (array-like shape) - Datasets' sizes (train)
+        model_path (string) - Path to save the model after each epoch
+        criterion (torch.nn.functional) - Loss function 
+        optimizer (torch.optim) - Optimizer 
+        epochs (int) - Number of epochs to train
     """
     
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -77,14 +77,14 @@ def train_val(model, dataloaders, dataset_sizes, model_path,
     """ Train a model evaluating it over the validation set at the end of 
         each epoch and return the model with best loss on the validation set.
         
-        Parameters:
-            model (torch.nn.Module) - Model to be trained
-            dataloaders (array-like shape) - Dataloaders (train and val)
-            dataset_sizes (array-like shape) - Datasets' sizes (train and val)
-            model_path (string) - Path to save the best model
-            criterion (torch.nn.functional) - Loss function 
-            optimizer (torch.optim) - Optimizer 
-            epochs (int) - Number of epochs to train
+    Args:
+        model (torch.nn.Module) - Model to be trained
+        dataloaders (array-like shape) - Dataloaders (train and val)
+        dataset_sizes (array-like shape) - Datasets' sizes (train and val)
+        model_path (string) - Path to save the best model
+        criterion (torch.nn.functional) - Loss function 
+        optimizer (torch.optim) - Optimizer 
+        epochs (int) - Number of epochs to train
     """
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -169,16 +169,16 @@ def train_early_stopping(model, dataloaders, dataset_sizes, model_path,
                              criterion, optimizer, n_steps=2, patience=2):
     """ Train a model applying early stopping 
         
-        Parameters:
-            model (torch.nn.Module) - Model to be trained
-            dataloaders (array-like shape) - Dataloaders (train and val)
-            dataset_sizes (array-like shape) - Datasets' sizes (train and val)
-            model_path (string) - Path to save the best model
-            criterion (torch.nn.functional) - Loss function 
-            optimizer (torch.optim) - Optimizer 
-            n_steps (int) - Number of steps between evaluations
-            patience (int) - Number of times to observe worsening 
-            validation set error before giving up
+    Args:
+        model (torch.nn.Module) - Model to be trained
+        dataloaders (array-like shape) - Dataloaders (train and val)
+        dataset_sizes (array-like shape) - Datasets' sizes (train and val)
+        model_path (string) - Path to save the best model
+        criterion (torch.nn.functional) - Loss function 
+        optimizer (torch.optim) - Optimizer 
+        n_steps (int) - Number of steps between evaluations
+        patience (int) - Number of times to observe worsening validation set error 
+        before giving up
     """
     epoch = 0
     fails = 0
@@ -196,7 +196,6 @@ def train_early_stopping(model, dataloaders, dataset_sizes, model_path,
         'loss': 1e8,
         'val_loss': 1e8,
     }
-    
     
     while fails < patience:
         
@@ -322,4 +321,3 @@ class EarlyStopping:
             self.trace_func(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
         torch.save(model.state_dict(), self.path)
         self.val_loss_min = val_loss
-

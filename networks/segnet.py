@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
+
 """
     segnet module
     
@@ -12,6 +13,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.models as models 
 from utils import normal_init
+
 
 def load_pretrained_vg166_bn():
     """ Loads the pretrained VGG-16 with Batch Normalization model """
@@ -36,19 +38,19 @@ class conv2DBatchNormRelu(nn.Module):
                                     dilation=1,    bias=True, batchnorm=True):
         """ Initialize a conv2DBatchNormRelu module 
 
-            Parameters: 
-                in_channels (int) – Number of channels in the input image
-                out_channels (int) – Number of channels produced by the convolution
-                kernel_size (int or tuple) – Size of the convolving kernel
-                stride (int or tuple, optional) – Stride of the convolution. Default: 1
-                padding (int or tuple, optional) – Zero-padding added to both sides of 
-                    the input. Default: 0
-                dilation (int or tuple, optional) – Spacing between kernel elements. 
-                    Default: 1
-                bias (bool, optional) – If True, adds a learnable bias to the output. 
-                    Default: True
-                batchnorm (bool, optional) – If True, adds a torch.nn.BatchNorm2d(out_channels) 
-                    layer to the module. Default: True
+        Args: 
+            in_channels (int) – Number of channels in the input image
+            out_channels (int) – Number of channels produced by the convolution
+            kernel_size (int or tuple) – Size of the convolving kernel
+            stride (int or tuple, optional) – Stride of the convolution. Default: 1
+            padding (int or tuple, optional) – Zero-padding added to both sides of 
+                the input. Default: 0
+            dilation (int or tuple, optional) – Spacing between kernel elements. 
+                Default: 1
+            bias (bool, optional) – If True, adds a learnable bias to the output. 
+                Default: True
+            batchnorm (bool, optional) – If True, adds a torch.nn.BatchNorm2d(out_channels) 
+                layer to the module. Default: True
         """
         super(conv2DBatchNormRelu, self).__init__()
         if batchnorm:
@@ -67,11 +69,12 @@ class conv2DBatchNormRelu(nn.Module):
     
     def forward(self, inputs):
         """ Compute a forward pass.
-            Parameters: 
-                inputs (torch.Tensor) - Inputs
-            
-            Returns:
-                outputs (torch.Tensor) - Output of the module
+
+        Args:
+            inputs (torch.Tensor) - Inputs
+        
+        Returns:
+            outputs (torch.Tensor) - Output of the module
         """
         outputs = self.block(inputs)
         return outputs
@@ -83,9 +86,9 @@ class segnetEncoderBlock2(nn.Module):
     def __init__(self, in_channels, out_channels):
         """ Create an instance of segnetEncoderBlock.
 
-            Parameters: 
-                in_channels (int): number of input channels.
-                out_channels (int): number of output channels.
+        Args:
+            in_channels (int): number of input channels.
+            out_channels (int): number of output channels.
         """
         super(segnetEncoderBlock2, self).__init__()
         self.conv1 = conv2DBatchNormRelu(in_channels, out_channels, 
@@ -97,12 +100,12 @@ class segnetEncoderBlock2(nn.Module):
     def forward(self, inputs):
         """ Encode the inputs    
 
-            Parameters: 
-                inputs (torch.Tensor): inputs to be encoded.
+        Args:
+            inputs (torch.Tensor): inputs to be encoded.
 
-            Returns:
-                (torch.Tensor, torch.Tensor, int): encoded input, indices of 
-                the MaxPooling operation and output's size
+        Returns:
+            (torch.Tensor, torch.Tensor, int): encoded input, indices of 
+            the MaxPooling operation and output's size
         """
         outputs = self.conv1(inputs)
         outputs = self.conv2(outputs)
@@ -117,9 +120,9 @@ class segnetEncoderBlock3(nn.Module):
     def __init__(self, in_channels, out_channels):
         """ Create an instance of segnetEncoderBlock.
 
-            Parameters: 
-                in_channels (int) - Number of input channels.
-                out_channels (int) - Number of output channels.
+        Args:
+            in_channels (int) - Number of input channels.
+            out_channels (int) - Number of output channels.
         """
         super(segnetEncoderBlock3, self).__init__()
         self.conv1 = conv2DBatchNormRelu(in_channels, out_channels, 
@@ -133,12 +136,12 @@ class segnetEncoderBlock3(nn.Module):
     def forward(self, inputs):
         """ Encode the inputs    
 
-            Parameters: 
-                inputs (torch.Tensor) - Inputs to be encoded.
+        Args:
+            inputs (torch.Tensor) - Inputs to be encoded.
 
-            Returns:
-                (torch.Tensor, torch.Tensor, int) - Encoded input, indices of 
-                the MaxPooling operation and output's size
+        Returns:
+            (torch.Tensor, torch.Tensor, int) - Encoded input, indices of 
+            the MaxPooling operation and output's size
         """
         outputs = self.conv1(inputs)
         outputs = self.conv2(outputs)
@@ -154,9 +157,9 @@ class segnetDecoderBlock2(nn.Module):
     def __init__(self, in_channels, out_channels):
         """ Create an instance of segnetDecoderBlock2.
 
-            Parameters: 
-                in_channels (int): number of input channels.
-                out_channels (int): number of output channels.
+        Args:
+            in_channels (int): number of input channels.
+            out_channels (int): number of output channels.
         """
         super(segnetDecoderBlock2, self).__init__()
         self.unpool = nn.MaxUnpool2d(2,2)
@@ -168,13 +171,13 @@ class segnetDecoderBlock2(nn.Module):
     def forward(self, inputs, indices, output_size):
         """ Decode the input. 
             
-            Parameters: 
-                inputs (torch.Tensor): inputs to be decoded. 
-                indices (torch.Tensor): saved indices of the MaxPooling operation.
-                output_size (int): the desired output size.
-            
-            Returns: 
-                (torch.Tensor): decoded input.
+        Args:
+            inputs (torch.Tensor): inputs to be decoded. 
+            indices (torch.Tensor): saved indices of the MaxPooling operation.
+            output_size (int): the desired output size.
+        
+        Returns: 
+            (torch.Tensor): decoded input.
         """
         outputs = self.unpool(inputs, indices=indices, output_size=output_size)
         outputs = self.conv1(outputs)
@@ -188,9 +191,9 @@ class segnetDecoderBlock3(nn.Module):
     def __init__(self, in_channels, out_channels):
         """ Create an instance of segnetDecoderBlock.
 
-            Parameters: 
-                in_channels (int): number of input channels.
-                out_channels (int): number of output channels.
+        Args:
+            in_channels (int): number of input channels.
+            out_channels (int): number of output channels.
         """
         super(segnetDecoderBlock3, self).__init__()
         self.unpool = nn.MaxUnpool2d(2,2)
@@ -204,13 +207,13 @@ class segnetDecoderBlock3(nn.Module):
     def forward(self, inputs, indices, output_size):
         """ Decode the input. 
             
-            Parameters: 
-                inputs (torch.Tensor): inputs to be decoded. 
-                indices (torch.Tensor): saved indices of the MaxPooling operation.
-                output_size (int): the desired output size.
-            
-            Returns: 
-                (torch.Tensor): decoded input.
+        Args:
+            inputs (torch.Tensor): inputs to be decoded. 
+            indices (torch.Tensor): saved indices of the MaxPooling operation.
+            output_size (int): the desired output size.
+        
+        Returns: 
+            (torch.Tensor): decoded input.
         """
         outputs = self.unpool(inputs, indices=indices, output_size=output_size)
         outputs = self.conv1(outputs)
@@ -225,10 +228,10 @@ class Segnet(nn.Module):
     def __init__(self, in_channels, out_channels, debug=False):
         """Initialize an instance of SegNet
 
-            Parameters:
-                in_channels (int): number of input channels 
-                out_channels (int): number of output channels
-                vgg16_bn (torch.model): pretrained VGG-16 (with Batch Normalization) model
+        Args:
+            in_channels (int): number of input channels 
+            out_channels (int): number of output channels
+            vgg16_bn (torch.model): pretrained VGG-16 (with Batch Normalization) model
         """
         super(Segnet, self).__init__()
         self.in_channels = in_channels 
@@ -275,11 +278,11 @@ class Segnet(nn.Module):
     def forward(self, x):
         """Compute a forward pass 
 
-            Parameters: 
-                x (torch.Tensor): input image(s).
+        Args:
+            x (torch.Tensor): input image(s).
 
-            Returns: 
-                (torch.Tensor): pixel-level classification
+        Returns: 
+            (torch.Tensor): pixel-level classification
         """ 
         # Encoder
         enc00, indices00, output_size00 = self.enc_block00(x)
@@ -314,12 +317,12 @@ class Segnet(nn.Module):
     def encoder_dims(self, block, io):
         """ Obtain the encoder dimensions based on the input dimensions
 
-            Parameters: 
-                block (string): encoder block 
-                io (string): 'in' or 'out'
+        Args:
+            block (string): encoder block 
+            io (string): 'in' or 'out'
 
-            Returns: 
-                (int): input/output dimensions of the corresponding encoder block
+        Returns: 
+            (int): input/output dimensions of the corresponding encoder block
         """
         encoder_dimensions = {
             'block00': { 'in': self.in_channels,'out': 64 },
@@ -333,12 +336,12 @@ class Segnet(nn.Module):
     def decoder_dims(self, block, io): 
         """ Obtain the decoder's dimensions based on the output dimensions 
 
-            Parameters: 
-                block (string): decoder block 
-                io (string): 'in' or 'out'
+        Args:
+            block (string): decoder block 
+            io (string): 'in' or 'out'
 
-            Returns: 
-                (int): input/output dimensions of the corresponding decoder block
+        Returns: 
+            (int): input/output dimensions of the corresponding decoder block
         """
         decoder_dimensions = {
             'block04': { 'in': 512, 'out': 512 },
@@ -350,9 +353,7 @@ class Segnet(nn.Module):
         return decoder_dimensions[block][io]
         
     def _load_encoder_weights(self):
-        """
-            Load the corresponding weights of the train VGG16 model into the encoder.
-        """ 
+        """ Load the corresponding weights of the train VGG16 model into the encoder. """ 
         # Load pretrained model
         vgg16_bn = load_pretrained_vg166_bn()
 

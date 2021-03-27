@@ -17,12 +17,12 @@ def median_frequency_balancing(training_data, n_classes):
         frequencies. Based on the paper `Predicting Depth, Surface Normals and Semantic 
         Labels with a Common Multi-Scale Convolutional Architecture <http://https://arxiv.org/abs/1411.4734>`_
 
-        Args:
-            training_data (array) - Training dataset of pairs (image, labels)
-            n_classes (int) - Number of classes
+    Args:
+        training_data (array) - Training dataset of pairs (image, labels)
+        n_classes (int) - Number of classes
 
-        Returns: 
-            (array) - Weight of each class
+    Returns: 
+        (array) - Weight of each class
     """
     freqs = np.zeros(n_classes) # Frequencies of each class
     pixel_counts = np.zeros(n_classes) # Number of pixels of class c
@@ -49,10 +49,10 @@ def plot_seg_results(images, ground_truths, predictions):
     """ Plot a grid of several images, their ground-truth segmentations
         and their predicted segmentations.
       
-        Args:
-            images (array-like shape) - Images
-            ground_truths (array-like shape) - Ground-truth segmentations
-            predictions (array-like shape) - Predicted segmentations
+    Args:
+        images (array-like shape) - Images
+        ground_truths (array-like shape) - Ground-truth segmentations
+        predictions (array-like shape) - Predicted segmentations
     """
     f, axarr = plt.subplots(len(images), 3)
     f.set_size_inches(10,3*len(images))
@@ -79,10 +79,10 @@ def plot_seg_result(image, ground_truth, prediction):
     """ Show a grid of several images, their ground-truth segmentations
         and their predicted segmentations.
       
-        Args:
-            image (torch.Tensor or numpy.array) - Image
-            ground_truth (torch.Tensor or numpy.array) - Ground-truth segmentation
-            prediction (torch.Tensor or numpy.array) - Predicted segmentation
+    Args:
+        image (torch.Tensor or numpy.array) - Image
+        ground_truth (torch.Tensor or numpy.array) - Ground-truth segmentation
+        prediction (torch.Tensor or numpy.array) - Predicted segmentation
     """
     f, axarr = plt.subplots(1,3)
     f.set_size_inches(5, 10)
@@ -106,11 +106,11 @@ def plot_seg_result(image, ground_truth, prediction):
 def plot_metric(metric_history, label, color='b'): 
     """ Plot a metric vs. the epochs 
       
-        Args: 
-            metric_history (numpy.array): history of the metric's values order
-                from older to newer.
-            label (string): y-axis label
-            title (string): title for the plot
+    Args: 
+        metric_history (numpy.array): history of the metric's values order
+            from older to newer.
+        label (string): y-axis label
+        title (string): title for the plot
     """
     epochs = range(len(metric_history))
     plt.plot(epochs, metric_history, color, label=label)
@@ -121,20 +121,3 @@ def plot_metric(metric_history, label, color='b'):
     plt.legend()
     plt.show()
 
-
-def count_parameters(model, only_trainable=False):
-    """ Count the number of parameters of a model.
-    
-        Args:
-            model (torch.nn.Module) - Model
-            only_trainable (bool) - Determines if only the trainable 
-                parameters are counted or not. Default: False
-        
-        Returns:
-            (int) - Count
-    """
-    if only_trainable:
-        count = sum(p.numel() for p in model.parameters() if p.requires_grad)
-    else:
-        count = sum(p.numel() for p in model.parameters())
-    return count

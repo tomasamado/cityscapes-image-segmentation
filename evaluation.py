@@ -37,14 +37,14 @@ class EvaluationReport:
         """ Create a MetricsReport object given the ground-truth labels and the 
             predicted labels. 
         
-            Parameters:
-                ground_truths (array-like of shape) - Ground-truth (correct) label values
-                predictions (array-like of shape) - Predicted label values
-                labels (array-like of shape) - Possible pixel labels 
-                weights (array-like of shape, optional) - Weights of the different classes
+        Args:
+            ground_truths (array-like of shape) - Ground-truth (correct) label values
+            predictions (array-like of shape) - Predicted label values
+            labels (array-like of shape) - Possible pixel labels 
+            weights (array-like of shape, optional) - Weights of the different classes
 
-            Returs:
-                (EvaluationReport) - A evaluation report
+        Returs:
+            (EvaluationReport) - A evaluation report
         """  
         cm = cm_sklearn(ground_truths, predictions, labels=labels)
         return cls(cm, labels, weights)
@@ -54,15 +54,15 @@ class EvaluationReport:
         """ Create a MetricsReport object given a dataloader and the model to
              make the predictions.
 
-            Parameters:
-                dataloader (torch.utils.data.Dataloader) - Dataloader
-                model (torch.nn.Module) - Model to make the predictions
-                labels (array-like of shape) - Possible pixel labels
-                weights (array-like of shape, optional) - Weights of the different 
-                classes
+        Args:
+            dataloader (torch.utils.data.Dataloader) - Dataloader
+            model (torch.nn.Module) - Model to make the predictions
+            labels (array-like of shape) - Possible pixel labels
+            weights (array-like of shape, optional) - Weights of the different 
+            classes
 
-            Returs:
-                (EvaluationReport) - A evaluation report
+        Returs:
+            (EvaluationReport) - A evaluation report
         """
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         true_list = []
@@ -162,16 +162,15 @@ class EvaluationReport:
         return np.array([[TN, FP], [FN, TP]])
     
     def _general_metric(self, metric, pos_label=1, average="binary"):
-        """
-            Obtain the necessary confusion matrix and weights to compute any metric.
+        """ Obtain the necessary confusion matrix and weights to compute any metric.
             
-            Parameters:
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (array-like, array-like) - Indices of the confusion matrices and weights
+        Args:
+            pos_label (str or int, default=1) - The class to report if average='binary' 
+            and the data is binary.
+            average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
+            
+        Returns:
+            (array-like, array-like) - Indices of the confusion matrices and weights
         """
         assert any(np.isin(EvaluationReport.averages, average)), "unknown 'average' method"
         assert any(np.isin(self._labels, pos_label)), "unknown target class '{}'".format(pos_label)
@@ -204,11 +203,11 @@ class EvaluationReport:
     def confusion_matrix(self, pos_label=1):
         """ Return the confusion matrix of a certain label.
         
-            Parameters:
-                pos_label(int) - 
-                
-            Returns:
-                (numpy.array) - Confusion matrix
+        Args:
+            pos_label(int) - 
+            
+        Returns:
+            (numpy.array) - Confusion matrix
         """
         assert any(np.isin(self._labels, pos_label)), "unknown target class '{}'".format(pos_label)
         c = np.where(self._labels == pos_label)[0][0]  
@@ -216,19 +215,18 @@ class EvaluationReport:
     
     
     def get_metrics(self, metrics="all", pos_label=1, average="binary"):
-        """
-            Compute a set of metrics.
+        """ Compute a set of metrics.
             
-            Parameters:
-                metrics (any subset of {"all", "accuracy", "sensitivity", "specificity", 
-                "dice_coeff", "jaccard_sim", "precision", "recall", "f1_score"'}, default="all") - 
-                Metrics to be computed.                           
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’, ’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (float) - All metrics
+        Args:
+            metrics (any subset of {"all", "accuracy", "sensitivity", "specificity", 
+            "dice_coeff", "jaccard_sim", "precision", "recall", "f1_score"'}, default="all") - 
+            Metrics to be computed.                           
+            pos_label (str or int, default=1) - The class to report if average='binary' 
+            and the data is binary.
+            average ({‘macro’, ’weighted’, ‘binary’}, default='binary') - 
+            
+        Returns:
+            (float) - All metrics
         """    
         assert metrics == "all" or set(metrics).issubset(EvaluationReport.metrics), "invalid list of metrics"
         report = dict()
@@ -257,117 +255,117 @@ class EvaluationReport:
     def TN(self, pos_label=1, average="binary"):
         """ Compute the True Negatives.
             
-            Parameters:
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (float) - True Negatives
+        Args:
+            pos_label (str or int, default=1) - The class to report if average='binary' 
+            and the data is binary.
+            average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
+            
+        Returns:
+            (float) - True Negatives
         """
         return self._general_metric(EvaluationReport._TN, pos_label, average)   
 
     def FP(self, pos_label=1, average="binary"):
         """ Compute the False Positives.
             
-            Parameters:
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (float) - False Positives
+        Args:
+            pos_label (str or int, default=1) - The class to report if average='binary' 
+            and the data is binary.
+            average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
+            
+        Returns:
+            (float) - False Positives
         """
         return self._general_metric(EvaluationReport._FP, pos_label, average)    
 
     def FN(self, pos_label=1, average="binary"):
         """ Compute the False Negatives.
             
-            Parameters:
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (float) - False Negatives
+        Args:
+            pos_label (str or int, default=1) - The class to report if average='binary' 
+            and the data is binary.
+            average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
+            
+        Returns:
+            (float) - False Negatives
         """
         return self._general_metric(EvaluationReport._FN, pos_label, average)    
 
     def TP(self, pos_label=1, average="binary"):
         """ Compute the True Positives.
             
-            Parameters:
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (float) - True Positives
+        Args:
+            pos_label (str or int, default=1) - The class to report if average='binary' 
+            and the data is binary.
+            average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
+            
+        Returns:
+            (float) - True Positives
         """
         return self._general_metric(EvaluationReport._TP, pos_label, average)   
 
     def accuracy(self, pos_label=1, average="binary"):
         """ Compute the accuracy in a per-class basis.
             
-            Parameters:
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (float) - Accuracy
+        Args:
+            pos_label (str or int, default=1) - The class to report if average='binary' 
+            and the data is binary.
+            average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
+            
+        Returns:
+            (float) - Accuracy
         """
         return self._general_metric(EvaluationReport._accuracy, pos_label, average)   
 
     def precision(self, pos_label=1, average="binary"):
         """ Compute the precision.
             
-            Parameters:
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (float) - precision
+        Args:
+            pos_label (str or int, default=1) - The class to report if average='binary' 
+            and the data is binary.
+            average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
+            
+        Returns:
+            (float) - precision
         """
         return self._general_metric(EvaluationReport._precision, pos_label, average)   
 
     def recall(self, pos_label=1, average="binary"):
         """ Compute the Recall.
             
-            Parameters:
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (float) - Recall
+        Args:
+            pos_label (str or int, default=1) - The class to report if average='binary' 
+            and the data is binary.
+            average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
+            
+        Returns:
+            (float) - Recall
         """
         return self._general_metric(EvaluationReport._recall, pos_label, average)  
 
     def sensitivity(self, pos_label=1, average="binary"):
         """ Compute the sensitivity.
             
-            Parameters:
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (float) - Sensitivity
+        Args:
+            pos_label (str or int, default=1) - The class to report if average='binary' 
+            and the data is binary.
+            average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
+            
+        Returns:
+            (float) - Sensitivity
         """
         return self._general_metric(EvaluationReport._recall, pos_label, average) 
     
     def specificity(self, pos_label=1, average="binary"):
         """ Compute the specifity.
             
-            Parameters:
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (float) - Specitifity
+        Args:
+            pos_label (str or int, default=1) - The class to report if average='binary' 
+            and the data is binary.
+            average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
+            
+        Returns:
+            (float) - Specitifity
         """
         return self._general_metric(EvaluationReport._specificity, pos_label, average)
     
@@ -375,38 +373,38 @@ class EvaluationReport:
     def dice_coeff(self, pos_label=1, average="binary"):
         """ Compute Dice's coefficient.
             
-            Parameters:
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (float) - Dice's coefficient
+        Args:
+            pos_label (str or int, default=1) - The class to report if average='binary' 
+            and the data is binary.
+            average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
+            
+        Returns:
+            (float) - Dice's coefficient
         """
         return self._general_metric(EvaluationReport._f1_score, pos_label, average)
     
     def jaccard_similarity(self, pos_label=1, average="binary"):
         """ Compute Jaccard similarity
             
-            Parameters:
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (float) - Jaccard similarity
+        Args:
+            pos_label (str or int, default=1) - The class to report if average='binary' 
+            and the data is binary.
+            average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
+            
+        Returns:
+            (float) - Jaccard similarity
         """
         return self._general_metric(EvaluationReport._jaccard_similarity, pos_label, average)
     
     def f1_score(self, pos_label=1, average="binary"):
         """ Compute Jaccard similarity
             
-            Parameters:
-                pos_label (str or int, default=1) - The class to report if average='binary' 
-                and the data is binary.
-                average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
-                
-            Returns:
-                (float) - Jaccard similarity
+        Args:
+            pos_label (str or int, default=1) - The class to report if average='binary' 
+            and the data is binary.
+            average ({‘macro’,’weighted’, ‘binary’}, default='binary') - 
+            
+        Returns:
+            (float) - Jaccard similarity
         """
         return self._general_metric(EvaluationReport._f1_score, pos_label, average)
