@@ -6,8 +6,17 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 
-class RConv(nn.Module):
+class RConv(nn.Module):   
+    """ Recurrent convolutional block. """
+    
     def __init__(self, in_channels, out_channels):
+        
+        """ Initialize an instance of RConv. 
+
+            Parameters:
+                in_channels: number of channels from the input
+                out_channels: desired number of channels to output
+        """
         super(RConv, self).__init__()
         
         self.conv1 = nn.Conv2d(in_channels, out_channels, 3, 1, padding = 1)
@@ -23,21 +32,32 @@ class RConv(nn.Module):
         return h3
     
 class RRConv(nn.Module):
+    """ Recurrent residual convolutional block. """
+    
     def __init__(self, in_channels, out_channels):
+        
+         """ Initialize an instance of RConv. 
+
+            Parameters:
+                in_channels: number of channels from the input
+                out_channels: desired number of channels to output
+        """
         super(RRConv, self).__init__()
         
         self.conv1 = nn.Conv2d(in_channels, out_channels, 3, 1, padding = 1)
         self.rconv1 = RConv(in_channels, out_channels)
         self.rconv2 = RConv(out_channels, out_channels)
         self.bn1 = nn.BatchNorm2d(out_channels)
-        
-        #batch norm
     
-    def forward(self, x):       
+    def forward(self, x):   
+        
+        #Identity convolution to add later
         iden = self.conv1(x)
+        
         x = F.relu(self.bn1(self.rconv1(x)))
         x = F.relu(self.bn1(self.rconv2(x)))
         
+        #Original input is added
         x = x + iden
         x = F.relu(x)
         

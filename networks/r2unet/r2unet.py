@@ -10,7 +10,11 @@ import torch.nn.functional as F
 import torch  
 from .rrcnblock import RRConv
 
+
+# %%
 class Downsample(nn.Module):
+    """ Downsampling layer of R2U-net """
+    
     def __init__(self, in_channel, out_channel):
         super(Downsample, self).__init__()
         
@@ -23,9 +27,13 @@ class Downsample(nn.Module):
         x_up = x
         x = self.maxpool(x)
         
-        return x, x_up
-    
+        return x, x_up   
+
+
+# %%
 class Upsample(nn.Module):
+    """ Upsampling layer of R2U-net """
+    
     def __init__(self, in_channel, out_channel):
         super(Upsample, self).__init__()
         
@@ -39,24 +47,38 @@ class Upsample(nn.Module):
         x = self.rrcu(x)
            
         return x
-    
+
+
+# %%
 class R2UNet64(nn.Module):
+    
+    """ Recurrent Residual Convolutional Neural Network (R2U-Net).
+    
+        R2UNet64 expands to 64 channels on the first layer.
+    """
+    
     def __init__(self):
+        
+        """ Initialize an instance of R2U-Net. """
+        
         super(R2UNet64, self).__init__()
         
-        #Conv layer
-        
+        #Encoder section 
         self.downsample1 = Downsample(3,64)
         self.downsample2 = Downsample(64,128)
         self.downsample3 = Downsample(128,256)
         self.downsample4 = Downsample(256,512)
         
+        #Umpsampling section
         self.upsample1 = Upsample(1024,512)
         self.upsample2 = Upsample(512,256)
         self.upsample3 = Upsample(256,128)
         self.upsample4 = Upsample(128,64)     
         
+        #RRConv at the bottom of the model
         self.rrcu1 = RRConv(512, 1024)
+        
+        #Final convolution to channel = n of classes
         self.conv1 = nn.Conv2d(64, 19, 1)
 
         
@@ -76,26 +98,36 @@ class R2UNet64(nn.Module):
         x = self.upsample4(x, x_crop1)
         
         x = F.relu(self.conv1(x))
+        x = F.softmax(x, dim = 1)
         
         return x
-    
+
+
+# %%
 class R2UNet16(nn.Module):
+    """ Recurrent Residual Convolutional Neural Network (R2U-Net).
+    
+        R2UNet16 expands to 16 channels on the first layer.
+    """
     def __init__(self):
         super(R2UNet16, self).__init__()
         
-        #Conv layer
-        
+        #Encoder section
         self.downsample1 = Downsample(3,16)
         self.downsample2 = Downsample(16, 32)
         self.downsample3 = Downsample(32,64)
         self.downsample4 = Downsample(64,128)
         
+        #Umpsampling section        
         self.upsample1 = Upsample(256,128)
         self.upsample2 = Upsample(128,64)
         self.upsample3 = Upsample(64,32)
         self.upsample4 = Upsample(32,16)   
         
+        #RRConv at the bottom of the model
         self.rrcu1 = RRConv(128, 256)
+        
+        #Final convolution to channel = n of classes
         self.conv1 = nn.Conv2d(16, 19, 1)
 
         
@@ -115,8 +147,6 @@ class R2UNet16(nn.Module):
         x = self.upsample4(x, x_crop1)
         
         x = F.relu(self.conv1(x))
+        x = F.softmax(x, dim = 1)
         
         return x
-
-
-# %%
