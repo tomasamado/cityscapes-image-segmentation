@@ -1,16 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 # %%
-#R2unet model with 64 channels at the first layer
-
-
 import os
 import torch.nn as nn
 import torch.nn.functional as F
 import torch  
 from .rrcnblock import RRConv
-
-
 # %%
 class Downsample(nn.Module):
     """ Downsampling layer of R2U-net """

@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # coding: utf-8
-# %%
 import os
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
 
-class RConv(nn.Module):   
+
+class RConv(nn.Module):
     """ Recurrent convolutional block. """
     
     def __init__(self, in_channels, out_channels):
@@ -30,7 +30,7 @@ class RConv(nn.Module):
         h3 = self.conv2(h2) + x_f      
         
         return h3
-    
+
 class RRConv(nn.Module):
     """ Recurrent residual convolutional block. """
     
@@ -62,4 +62,3 @@ class RRConv(nn.Module):
         x = F.relu(x)
         
         return x       
-
