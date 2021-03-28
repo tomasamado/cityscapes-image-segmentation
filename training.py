@@ -272,7 +272,8 @@ def train_early_stopping(model, dataloaders, dataset_sizes, model_path,
 class EarlyStopping:
     """ Early stops the training if validation loss doesn't improve after a given patience.
     
-        Ref: https://github.com/Bjarten/early-stopping-pytorch
+    Ref: 
+        https://github.com/Bjarten/early-stopping-pytorch
         
     """
     def __init__(self, patience=7, verbose=False, delta=0, path='checkpoint.pt', trace_func=print):
@@ -316,7 +317,7 @@ class EarlyStopping:
             self.counter = 0
 
     def save_checkpoint(self, val_loss, model):
-        '''Saves model when validation loss decrease.'''
+        """ Saves model when validation loss decrease. """
         if self.verbose:
             self.trace_func(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
         torch.save(model.state_dict(), self.path)
