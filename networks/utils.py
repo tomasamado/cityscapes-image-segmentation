@@ -12,7 +12,8 @@ def normal_init(m, mean=0, std=1):
         mean (number) - Mean of the normal distribution.
         std (number) - Standard deviation of the normal distribution.
 
-    Ref: https://discuss.pytorch.org/t/pytorch-how-to-initialize-weights/81511/2
+    Ref: 
+        https://discuss.pytorch.org/t/pytorch-how-to-initialize-weights/81511/2
     """
     if isinstance(m, (nn.Linear, nn.Conv2d)):
         m.weight.data.normal_(mean, std)
@@ -26,13 +27,13 @@ def normal_init(m, mean=0, std=1):
 def count_parameters(model, only_trainable=False):
     """ Count the number of parameters of a model.
     
-        Args:
-            model (torch.nn.Module) - Model
-            only_trainable (bool) - Determines if only the trainable 
-                parameters are counted or not. Default: False
-        
-        Returns:
-            (int) - Count
+    Args:
+        model (torch.nn.Module) - Model
+        only_trainable (bool) - Determines if only the trainable 
+            parameters are counted or not. Default: False
+    
+    Returns:
+        (int) - Count
     """
     if only_trainable:
         count = sum(p.numel() for p in model.parameters() if p.requires_grad)

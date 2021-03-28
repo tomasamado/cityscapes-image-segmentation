@@ -13,6 +13,12 @@ from .hanet import HANet
 class R2Unet16HANet(nn.Module):
 
     def __init__(self, hanet_layers=1):
+        """
+        
+        Args:
+            hanet_layers ({1,2,3}) - Number of HANet layers to be incorporated.
+
+        """
         assert hanet_layers in [1,2,3], "invalid number of HANet layers"
         
         super(R2Unet16HANet, self).__init__()
@@ -74,6 +80,12 @@ class R2Unet16HANet(nn.Module):
 class R2Unet64HANet(nn.Module):
     
     def __init__(self, hanet_layers=1):
+        """
+        
+        Args:
+            hanet_layers ({1,2,3}) - Number of HANet layers to be incorporated.
+
+        """
         assert hanet_layers in [1,2,3], "invalid number of HANet layers"
         
         super(R2Unet64HANet, self).__init__()

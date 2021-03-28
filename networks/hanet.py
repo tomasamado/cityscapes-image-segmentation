@@ -14,6 +14,20 @@ class Conv1dPosEncRelu(nn.Module):
 
     def __init__(self, in_channels, out_channels, kernel_size=1, stride=1,
                             padding=0, bias=True, positional_encoding=True):
+        """ 
+        Args:
+            in_channels (int) – Number of channels in the input image
+            out_channels (int) – Number of channels produced by the convolution
+            kernel_size (int or tuple) – Size of the convolving kernel
+            stride (int or tuple, optional) – Stride of the convolution. Default: 1
+            padding (int or tuple, optional) – Zero-padding added to both sides of 
+                the input. Default: 0
+            bias (bool, optional) – If True, adds a learnable bias to the output. 
+                Default: True
+            positional_encoding (bool, optional) – If True, adds positional encoding
+                to the convolution output. Default: True
+
+        """
         super(Conv1dPosEncRelu, self).__init__()
 
         self.conv = nn.Conv1d(in_channels, out_channels, kernel_size=kernel_size, 
@@ -35,6 +49,20 @@ class Conv1dPosEncSigmoid(nn.Module):
 
     def __init__(self, in_channels, out_channels, kernel_size=1, stride=1,
                             padding=0, bias=True, positional_encoding=True):
+        """ 
+        Args:
+            in_channels (int) – Number of channels in the input image
+            out_channels (int) – Number of channels produced by the convolution
+            kernel_size (int or tuple) – Size of the convolving kernel
+            stride (int or tuple, optional) – Stride of the convolution. Default: 1
+            padding (int or tuple, optional) – Zero-padding added to both sides of 
+                the input. Default: 0
+            bias (bool, optional) – If True, adds a learnable bias to the output. 
+                Default: True
+            positional_encoding (bool, optional) – If True, adds positional encoding
+                to the convolution output. Default: True
+
+        """
         super(Conv1dPosEncSigmoid, self).__init__()
         
         self.conv = nn.Conv1d(in_channels, out_channels, kernel_size=kernel_size, 
@@ -56,8 +84,8 @@ class HANet(nn.Module):
 
     def __init__(self, l_dims, h_dims, ww_pool="average", attention_height=16, 
                     reduction_ratio=32, n_convolutions=3, positional_encoding=True):
-        """ Initialize an instance of HANet. 
-
+        """ 
+        
         Args:
             l_dims ([int, int, int]): lower-level dimensions
             h_dims ([int, int, int]): higher-level dimensions
@@ -65,9 +93,9 @@ class HANet(nn.Module):
             attention_height (int): height of the attention's map
             reduction_ratio (int): reduction ratio
             n_convolutions (int): number of convolutions to create the attention 
-            map
+                map
             position_encoding (bool): determines if positional encoding is
-            injected after each convolution.
+                injected after each convolution.
         """
         assert len(l_dims) == 3, "all input dimensions CxHxW have to be provided"
         assert len(h_dims) == 3, "all output dimensions CxHxW have to be provided"

@@ -36,7 +36,7 @@ class conv2DBatchNormRelu(nn.Module):
 
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0,
                                     dilation=1,    bias=True, batchnorm=True):
-        """ Initialize a conv2DBatchNormRelu module 
+        """ 
 
         Args: 
             in_channels (int) – Number of channels in the input image
@@ -84,7 +84,7 @@ class segnetEncoderBlock2(nn.Module):
     """Segnet-Basic Encoder Block module"""
 
     def __init__(self, in_channels, out_channels):
-        """ Create an instance of segnetEncoderBlock.
+        """ 
 
         Args:
             in_channels (int): number of input channels.
@@ -118,7 +118,7 @@ class segnetEncoderBlock3(nn.Module):
     """Segnet-Basic Encoder Block module"""
 
     def __init__(self, in_channels, out_channels):
-        """ Create an instance of segnetEncoderBlock.
+        """ 
 
         Args:
             in_channels (int) - Number of input channels.
@@ -155,7 +155,7 @@ class segnetDecoderBlock2(nn.Module):
     """Segnet-Basic Decoder Block module"""
 
     def __init__(self, in_channels, out_channels):
-        """ Create an instance of segnetDecoderBlock2.
+        """ 
 
         Args:
             in_channels (int): number of input channels.
@@ -189,7 +189,7 @@ class segnetDecoderBlock3(nn.Module):
     """Segnet-Basic Decoder Block module"""
 
     def __init__(self, in_channels, out_channels):
-        """ Create an instance of segnetDecoderBlock.
+        """ 
 
         Args:
             in_channels (int): number of input channels.
@@ -226,8 +226,8 @@ class Segnet(nn.Module):
     """SegNet Class"""
 
     def __init__(self, in_channels, out_channels, debug=False):
-        """Initialize an instance of SegNet
-
+        """
+        
         Args:
             in_channels (int): number of input channels 
             out_channels (int): number of output channels
