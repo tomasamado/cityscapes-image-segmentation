@@ -5,4 +5,3 @@ Image segmentation has important applications in different fields such as medica
 
 ### Repository content
 
-### Dependencies 
