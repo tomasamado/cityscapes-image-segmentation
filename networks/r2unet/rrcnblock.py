@@ -9,8 +9,7 @@ import torch
 class RConv(nn.Module):
     """ Recurrent convolutional block. """
     
-    def __init__(self, in_channels, out_channels):
-        
+    def __init__(self, in_channels, out_channels):        
         """ Initialize an instance of RConv. 
 
             Parameters:
@@ -34,9 +33,8 @@ class RConv(nn.Module):
 class RRConv(nn.Module):
     """ Recurrent residual convolutional block. """
     
-    def __init__(self, in_channels, out_channels):
-        
-         """ Initialize an instance of RConv. 
+    def __init__(self, in_channels, out_channels):        
+        """ Initialize an instance of RConv. 
 
             Parameters:
                 in_channels: number of channels from the input
