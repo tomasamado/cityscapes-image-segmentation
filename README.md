@@ -5,5 +5,7 @@ Image segmentation has important applications in different fields such as medica
 
 Notebooks
 [Task 1: SimpleSegNet, PascalVOC dataset](https://github.com/tomasamado/cityscapes-image-segmentation/blob/main/Vision_task_1.ipynb)
+
 [Task 2: R2-Unet, Cityscapes datase](https://github.com/tomasamado/cityscapes-image-segmentation/blob/main/Vision_task_2.ipynb)
+
 [Task 3: R2-Unet + HANet, Cityscapes dataset](https://github.com/tomasamado/cityscapes-image-segmentation/blob/main/Vision_task_3.ipynb) 
